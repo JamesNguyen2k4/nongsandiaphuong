@@ -47,9 +47,15 @@
       </form>
 
       <!-- TOP ACTIONS -->
-      <button id="account-button" type="button" class="outline whitespace-nowrap text-sm">
-        <i data-lucide="user" class="w-4 h-4"></i> Tài khoản
-      </button>
+      <div class="flex items-center gap-2">
+        <a id="account-button" href="login.html" class="outline whitespace-nowrap text-sm flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          <span id="account-btn-label">Đăng nhập</span>
+        </a>
+        <button id="header-logout-btn" type="button" class="outline text-xs px-2.5 py-2 text-red-600 border-red-200 hover:bg-red-50 flex items-center gap-1" hidden title="Đăng xuất">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
 
       <button id="cart-header" type="button" data-go="cart" class="outline flex items-center gap-2 whitespace-nowrap text-sm">
         <i data-lucide="shopping-basket" class="w-5 h-5"></i>
@@ -64,8 +70,8 @@
       <button type="button" data-go="products" class="nav-link">Sản phẩm</button>
       <button type="button" data-go="about" class="nav-link">Giới thiệu</button>
       <button type="button" data-go="contact" class="nav-link">Liên hệ</button>
-      <button type="button" data-go="manage" class="nav-link text-[#174d37] font-bold flex items-center gap-1.5 bg-green-50 px-3 py-1 rounded-lg">
-        <i data-lucide="database" class="w-4 h-4"></i> Quản lý Database
+      <button type="button" id="nav-manage-btn" data-go="manage" class="nav-link text-[#174d37] font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200" hidden>
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-700"></i> Quản Trị Admin
       </button>
     </nav>
   </header>
@@ -100,7 +106,7 @@
       </section>
 
       <!-- CATALOG & PRODUCTS -->
-      <section class="shell py-12 md:py-16">
+      <section id="catalog-section" class="shell py-12 md:py-16">
         <div class="flex flex-wrap items-end justify-between gap-3 mb-7">
           <div>
             <p class="uppercase tracking-widest font-bold mb-1 text-xs text-[#648047]">DANH MỤC SẢN PHẨM</p>
@@ -255,6 +261,9 @@
       
       <div class="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
         <form id="order-form" class="bg-white rounded-2xl border p-6 md:p-8 grid gap-4 shadow-sm" novalidate>
+          <!-- BANNER THÔNG TIN TÀI KHOẢN -->
+          <div id="checkout-auth-banner" class="p-4 rounded-xl text-sm flex flex-wrap items-center justify-between gap-3 border"></div>
+
           <div>
             <label for="customer-name" class="label">Họ và tên người nhận <span class="text-red-500">*</span></label>
             <input id="customer-name" class="field" required maxlength="100" placeholder="Nguyễn Văn A" autocomplete="name">
@@ -271,20 +280,22 @@
             <label for="customer-note" class="label">Ghi chú thêm (tùy chọn)</label>
             <textarea id="customer-note" class="field" rows="2" maxlength="500" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến..."></textarea>
           </div>
-          <fieldset class="pt-2">
-            <legend class="label mb-2">Hình thức thanh toán</legend>
-            <label class="flex items-center gap-2 mb-2 p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-              <input type="radio" name="payment" value="COD" checked class="text-[#174d37] focus:ring-[#174d37]">
-              <span>Thanh toán khi nhận hàng (COD kiểm tra hàng trước)</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
-              <input type="radio" name="payment" value="Chuyển khoản" class="text-[#174d37] focus:ring-[#174d37]">
-              <span>Chuyển khoản ngân hàng (Quét mã QR)</span>
-            </label>
-          </fieldset>
+          <!-- KHÔNG CẦN THANH TOÁN - CHUYỂN TRỰC TIẾP TỚI QUẢN TRỊ VIÊN -->
+          <div class="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-4 text-emerald-950 flex items-start gap-3 mt-2">
+            <span class="w-8 h-8 rounded-full bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </span>
+            <div class="text-xs space-y-1">
+              <strong class="text-sm font-bold text-emerald-900 block">Đơn hàng chuyển trực tiếp đến Quản Trị Viên</strong>
+              <p class="text-emerald-800 leading-relaxed">
+                Website <strong>không yêu cầu thanh toán trước</strong>. Sau khi bấm nút bên dưới, toàn bộ thông tin đơn hàng và địa chỉ nhận hàng của bạn sẽ được lưu ngay vào Database của Quản trị viên để tiến hành liên hệ, chuẩn bị hàng và giao tận nơi.
+              </p>
+            </div>
+          </div>
           
-          <button id="order-submit" class="primary justify-self-start py-3 px-8 text-base mt-2" type="submit">
-            Gửi yêu cầu đặt hàng
+          <button id="order-submit" class="primary justify-self-start py-3.5 px-8 text-base mt-2 flex items-center gap-2" type="submit">
+            <i data-lucide="send" class="w-5 h-5"></i>
+            <span>Gửi Đơn Hàng Tới Quản Trị Viên</span>
           </button>
         </form>
 
@@ -302,8 +313,8 @@
         <div class="w-16 h-16 rounded-full bg-green-100 text-green-700 flex items-center justify-center mx-auto mb-5">
           <i data-lucide="check-circle-2" class="w-10 h-10"></i>
         </div>
-        <h1 class="text-3xl font-bold text-[#173626] mb-3">Đặt Hàng Thành Công!</h1>
-        <p class="muted mb-4">Cảm ơn bạn đã tin yêu và ủng hộ đặc sản Yên Bình Market. Đơn hàng đã được lưu trữ an toàn trong Database.</p>
+        <h1 class="text-3xl font-bold text-[#173626] mb-3">Đã Gửi Đơn Hàng Thành Công!</h1>
+        <p class="muted mb-4">Đơn hàng của bạn đã được chuyển thẳng vào Database của Quản trị viên. Quản trị viên sẽ sớm liên hệ qua số điện thoại để xác nhận đơn hàng.</p>
         <p id="success-code" class="font-mono font-bold text-lg text-[#174d37] bg-green-50 p-3 rounded-xl border border-green-200 mb-6"></p>
         <button type="button" data-go="home" class="primary">
           Tiếp tục xem sản phẩm <i data-lucide="shopping-bag" class="w-4 h-4"></i>
@@ -354,133 +365,329 @@
       <div id="policy-copy" class="bg-white rounded-2xl border p-8 max-w-3xl leading-relaxed text-gray-700 shadow-sm whitespace-pre-line"></div>
     </section>
 
-    <!-- 9. MANAGE VIEW (DATABASE & THÊM ẢNH SẢN PHẨM) -->
+    <!-- 9. ADMIN PORTAL (QUẢN TRỊ VIÊN: ĐƠN HÀNG & SẢN PHẨM) -->
     <section id="manage-view" class="view shell py-12" hidden>
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-[#173626] flex items-center gap-2">
-            <i data-lucide="database" class="w-8 h-8 text-[#174d37]"></i> Quản Lý Sản Phẩm Trong Database
-          </h1>
-          <p class="text-sm text-gray-500 mt-1">Dữ liệu được lưu trữ trực tiếp trong cơ sở dữ liệu trình duyệt (IndexedDB), hỗ trợ thêm ảnh sản phẩm chất lượng cao.</p>
+      <!-- GATE: HIỂN THỊ KHI CHƯA ĐĂNG NHẬP ADMIN -->
+      <div id="admin-gate" class="max-w-md mx-auto bg-white rounded-2xl border p-8 shadow-sm text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-[#174d37] flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="shield-alert" class="w-8 h-8"></i>
         </div>
-        <div class="flex items-center gap-3">
-          <span id="db-total-count" class="bg-green-100 text-[#174d37] font-bold text-xs px-3 py-1.5 rounded-full"></span>
-          <button id="btn-reset-db" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Khôi phục mẫu
+        <h1 class="text-2xl font-bold text-[#173626] mb-2">Khu Vực Quản Trị Viên</h1>
+        <p class="text-sm text-gray-500 mb-6">Trang này dành riêng cho quản trị viên để quản lý đơn hàng và sản phẩm. Vui lòng đăng nhập để tiếp tục.</p>
+
+        <form id="admin-login-form" class="space-y-4 text-left" novalidate>
+          <div>
+            <label for="admin-email" class="label">Tên đăng nhập hoặc Email Quản trị viên</label>
+            <input id="admin-email" type="text" class="field" required placeholder="admin hoặc admin@yenbinhmarket.vn" autocomplete="username">
+          </div>
+          <div>
+            <label for="admin-password" class="label">Mật khẩu</label>
+            <input id="admin-password" type="password" class="field" required placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button type="submit" class="primary w-full py-3 text-sm flex items-center justify-center gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i> Đăng nhập Quản Trị
           </button>
+        </form>
+        <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 text-left">
+          <strong>Tài khoản Admin mặc định:</strong><br>
+          • Đăng nhập: <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin</code> (hoặc <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin@yenbinhmarket.vn</code>)<br>
+          • Mật khẩu: <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin123</code>
         </div>
       </div>
 
-      <!-- FORM THÊM SẢN PHẨM MỚI KÈM ẢNH -->
-      <div class="bg-white border rounded-2xl p-6 md:p-8 max-w-4xl shadow-sm mb-12">
-        <h2 class="text-xl font-bold text-[#173626] mb-6 flex items-center gap-2 border-b pb-3">
-          <i data-lucide="plus-circle" class="w-5 h-5 text-[#174d37]"></i> Thêm Sản Phẩm Mới Vào Database
-        </h2>
-
-        <form id="product-form" class="grid sm:grid-cols-2 gap-5" novalidate>
-          <div class="sm:col-span-2">
-            <label for="p-name" class="label">Tên sản phẩm <span class="text-red-500">*</span></label>
-            <input id="p-name" class="field" required maxlength="120" placeholder="Ví dụ: Thịt trâu gác bếp Yên Bái thượng hạng">
-          </div>
-
+      <!-- DASHBOARD: HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP QUYỀN ADMIN -->
+      <div id="admin-dashboard" hidden>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b pb-5">
           <div>
-            <label for="p-category" class="label">Tên hiển thị danh mục</label>
-            <input id="p-category" class="field" required maxlength="70" placeholder="Ví dụ: Đặc sản – Nông sản sấy">
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-700 text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Admin Portal</span>
+              <span id="admin-greeting" class="text-xs text-gray-500"></span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-[#173626] mt-1 flex items-center gap-2">
+              <i data-lucide="layout-dashboard" class="w-7 h-7 text-[#174d37]"></i> Hệ Thống Quản Trị Cửa Hàng
+            </h1>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="admin-logout-btn" type="button" class="outline text-xs px-3.5 py-2 flex items-center gap-1.5 text-gray-700 hover:text-red-700">
+              <i data-lucide="log-out" class="w-4 h-4"></i> Đăng xuất Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- ADMIN TAB SWITCHER -->
+        <div class="flex flex-wrap gap-2 mb-8 bg-gray-100 p-1.5 rounded-xl border border-gray-200">
+          <button type="button" id="tab-btn-orders" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 bg-[#174d37] text-white shadow-sm">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            <span>Quản Lý Đơn Hàng</span>
+            <span id="badge-total-orders" class="bg-[#e9c963] text-[#174d37] text-xs px-2 py-0.5 rounded-full font-extrabold">0</span>
+          </button>
+          <button type="button" id="tab-btn-new-order" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>+ Thêm Đơn Hàng Mới</span>
+          </button>
+          <button type="button" id="tab-btn-products" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60">
+            <i data-lucide="package" class="w-4 h-4"></i>
+            <span>Quản Lý Sản Phẩm</span>
+            <span id="badge-total-products" class="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+          </button>
+        </div>
+
+        <!-- 1. TAB: QUẢN LÝ ĐƠN HÀNG -->
+        <div id="panel-admin-orders">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Lọc trạng thái:</span>
+              <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-[#174d37] text-white" data-status="all">Tất cả</button>
+              <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Chờ xác nhận">Chờ xác nhận</button>
+              <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Đang giao">Đang giao</button>
+              <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Hoàn thành">Hoàn thành</button>
+              <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Đã hủy">Đã hủy</button>
+            </div>
+            <button id="btn-refresh-orders" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới danh sách
+            </button>
           </div>
 
-          <div>
-            <label for="p-group" class="label">Nhóm lọc sản phẩm</label>
-            <select id="p-group" class="field">
-              <option value="dry">Thực phẩm khô</option>
-              <option value="tea">Trà đặc sản</option>
-              <option value="natural">Thảo mộc tự nhiên</option>
-              <option value="spice">Gia vị núi rừng</option>
-              <option value="drink">Đồ uống thiên nhiên</option>
-              <option value="all">Khác / Tổng hợp</option>
-            </select>
+          <div class="db-table-wrapper shadow-sm">
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th class="w-32">Mã & Ngày đặt</th>
+                  <th>Khách hàng & Liên hệ</th>
+                  <th>Địa chỉ giao hàng</th>
+                  <th>Chi tiết đơn hàng</th>
+                  <th class="whitespace-nowrap">Tổng tiền</th>
+                  <th class="whitespace-nowrap">Trạng thái</th>
+                  <th class="text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-list">
+                <tr><td colspan="7" class="text-center py-8 text-gray-500">Đang tải danh sách đơn hàng...</td></tr>
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div>
-            <label for="p-price" class="label">Giá bán (VNĐ) <span class="text-red-500">*</span></label>
-            <input id="p-price" class="field" type="number" min="1" step="1000" required placeholder="Ví dụ: 250000">
-          </div>
+        <!-- 2. TAB: TẠO ĐƠN HÀNG THỦ CÔNG CHO KHÁCH -->
+        <div id="panel-admin-new-order" hidden>
+          <div class="bg-white rounded-2xl border p-6 md:p-8 max-w-4xl shadow-sm">
+            <h2 class="text-xl font-bold text-[#173626] mb-2 flex items-center gap-2">
+              <i data-lucide="user-plus" class="w-5 h-5 text-[#174d37]"></i> Tạo Đơn Hàng Thủ Công (Khách gọi điện / Zalo)
+            </h2>
+            <p class="text-sm text-gray-500 mb-6">Dành cho Admin khi tiếp nhận đơn hàng bên ngoài website, đơn sẽ được ghi nhận vào Supabase Database.</p>
 
-          <div>
-            <label for="p-origin" class="label">Xuất xứ / Nguồn gốc</label>
-            <input id="p-origin" class="field" placeholder="Ví dụ: Thị xã Nghĩa Lộ, Yên Bái">
-          </div>
+            <form id="admin-create-order-form" class="grid sm:grid-cols-2 gap-5" novalidate>
+              <!-- Chọn sản phẩm thêm vào đơn -->
+              <div class="sm:col-span-2 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="label text-[#174d37] font-bold mb-2 block">1. Chọn sản phẩm thêm vào đơn</label>
+                <div class="flex flex-wrap gap-2 items-end">
+                  <div class="flex-1 min-w-[220px]">
+                    <select id="manual-order-product" class="field text-sm">
+                      <option value="">-- Chọn sản phẩm có trong kho --</option>
+                    </select>
+                  </div>
+                  <div class="w-24">
+                    <input id="manual-order-qty" type="number" min="1" max="99" value="1" class="field text-sm" placeholder="SL">
+                  </div>
+                  <button type="button" id="btn-add-item-to-manual-order" class="outline px-4 py-2.5 text-sm font-bold flex items-center gap-1.5 bg-white">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Thêm món
+                  </button>
+                </div>
 
-          <div>
-            <label for="p-pack" class="label">Quy cách đóng gói</label>
-            <input id="p-pack" class="field" placeholder="Ví dụ: Hộp hút chân không 500g">
-          </div>
-
-          <!-- KHU VỰC THÊM ẢNH SẢN PHẨM -->
-          <div class="sm:col-span-2 bg-[#f9faf7] p-5 rounded-xl border border-[#dbe5d8]">
-            <label class="label text-[#174d37] flex items-center gap-2 mb-3">
-              <i data-lucide="image" class="w-5 h-5"></i> Thêm ảnh sản phẩm
-            </label>
-            
-            <div class="grid md:grid-cols-2 gap-4 items-start">
-              <!-- Cột 1: Tải ảnh từ máy -->
-              <div>
-                <p class="text-xs font-semibold text-gray-600 mb-2">Cách 1: Tải ảnh từ máy tính / điện thoại</p>
-                <div id="image-upload-zone" class="image-upload-zone">
-                  <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-[#174d37] mb-2"></i>
-                  <p class="text-sm font-bold text-[#173626]">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
-                  <p class="text-xs text-gray-400 mt-1">Định dạng JPG, PNG, WEBP (Tự động tối ưu)</p>
-                  <input type="file" id="p-image-file" accept="image/*" class="hidden">
+                <!-- Danh sách món đã thêm trong đơn thủ công -->
+                <div id="manual-order-items-box" class="mt-4 pt-3 border-t border-gray-200">
+                  <p class="text-xs text-gray-500 font-semibold mb-2">Các món trong đơn:</p>
+                  <div id="manual-order-items-list" class="space-y-2 text-sm">
+                    <p class="text-xs text-gray-400 italic">Chưa chọn sản phẩm nào.</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t flex justify-between font-bold text-[#174d37] text-sm">
+                    <span>Tổng tiền đơn hàng:</span>
+                    <span id="manual-order-total">0 ₫</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Cột 2: Nhập đường link URL ảnh -->
-              <div>
-                <p class="text-xs font-semibold text-gray-600 mb-2">Cách 2: Nhập URL ảnh online</p>
-                <input id="p-image-url" type="url" class="field text-sm" placeholder="https://example.com/anh-san-pham.jpg">
-                <p class="text-xs text-gray-400 mt-2">Dán liên kết ảnh từ Unsplash, Google Drive, hoặc host bất kỳ.</p>
+              <!-- Thông tin người nhận -->
+              <div class="sm:col-span-2">
+                <label class="label text-[#174d37] font-bold mb-1 block">2. Thông tin khách hàng</label>
               </div>
-            </div>
 
-            <!-- Khung xem trước ảnh đã chọn -->
-            <div id="image-preview-container" class="preview-container" hidden>
-              <img id="image-preview" src="" alt="Xem trước ảnh">
-              <button type="button" id="image-preview-remove" class="preview-remove-btn" title="Hủy ảnh">
-                <i data-lucide="x" class="w-4 h-4"></i>
+              <div>
+                <label for="manual-customer-name" class="label">Họ tên người nhận <span class="text-red-500">*</span></label>
+                <input id="manual-customer-name" class="field" required placeholder="Nguyễn Văn A">
+              </div>
+
+              <div>
+                <label for="manual-customer-phone" class="label">Số điện thoại <span class="text-red-500">*</span></label>
+                <input id="manual-customer-phone" class="field" type="tel" required placeholder="0988 123 456">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="manual-customer-address" class="label">Địa chỉ giao hàng chi tiết <span class="text-red-500">*</span></label>
+                <textarea id="manual-customer-address" class="field" rows="2" required placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP"></textarea>
+              </div>
+
+              <div>
+                <label for="manual-payment" class="label">Phương thức thanh toán</label>
+                <select id="manual-payment" class="field">
+                  <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                  <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
+                  <option value="Đã thanh toán">Đã thanh toán trực tiếp</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="manual-status" class="label">Trạng thái ban đầu</label>
+                <select id="manual-status" class="field">
+                  <option value="Chờ xác nhận">Chờ xác nhận</option>
+                  <option value="Đang giao">Đang giao</option>
+                  <option value="Hoàn thành">Hoàn thành</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="manual-note" class="label">Ghi chú đơn hàng</label>
+                <input id="manual-note" class="field" placeholder="Ví dụ: Khách gọi từ hotline, giao buổi sáng...">
+              </div>
+
+              <div class="sm:col-span-2 pt-2">
+                <button type="submit" class="primary py-3 px-8 text-sm flex items-center gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4"></i> Tạo đơn hàng trên Database
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 3. TAB: QUẢN LÝ SẢN PHẨM -->
+        <div id="panel-admin-products" hidden>
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-[#173626] flex items-center gap-2">
+                <i data-lucide="package-search" class="w-6 h-6 text-[#174d37]"></i> Quản Lý Sản Phẩm Trong Kho
+              </h2>
+              <p class="text-sm text-gray-500 mt-1">Dữ liệu được lưu trữ trực tuyến trên đám mây Supabase Database.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="db-total-count" class="bg-green-100 text-[#174d37] font-bold text-xs px-3 py-1.5 rounded-full"></span>
+              <button id="btn-reset-db" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5 text-red-700 hover:bg-red-50" title="Xóa toàn bộ sản phẩm hiện có">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa tất cả
               </button>
             </div>
           </div>
 
-          <div class="sm:col-span-2">
-            <label for="p-description" class="label">Mô tả sản phẩm</label>
-            <textarea id="p-description" class="field" rows="3" maxlength="600" placeholder="Giới thiệu về hương vị, đặc điểm và công dụng nổi bật của sản phẩm..."></textarea>
+          <!-- FORM THÊM SẢN PHẨM MỚI KÈM ẢNH -->
+          <div class="bg-white border rounded-2xl p-6 md:p-8 max-w-4xl shadow-sm mb-12">
+            <h3 class="text-lg font-bold text-[#173626] mb-6 flex items-center gap-2 border-b pb-3">
+              <i data-lucide="plus-circle" class="w-5 h-5 text-[#174d37]"></i> Thêm Sản Phẩm Mới Vào Database
+            </h3>
+
+            <form id="product-form" class="grid sm:grid-cols-2 gap-5" novalidate>
+              <div class="sm:col-span-2">
+                <label for="p-name" class="label">Tên sản phẩm <span class="text-red-500">*</span></label>
+                <input id="p-name" class="field" required maxlength="120" placeholder="Ví dụ: Thịt trâu gác bếp Yên Bái thượng hạng">
+              </div>
+
+              <div>
+                <label for="p-category" class="label">Tên hiển thị danh mục</label>
+                <input id="p-category" class="field" required maxlength="70" placeholder="Ví dụ: Đặc sản – Nông sản sấy">
+              </div>
+
+              <div>
+                <label for="p-group" class="label">Nhóm lọc sản phẩm</label>
+                <select id="p-group" class="field">
+                  <option value="dry">Thực phẩm khô</option>
+                  <option value="tea">Trà đặc sản</option>
+                  <option value="natural">Thảo mộc tự nhiên</option>
+                  <option value="spice">Gia vị núi rừng</option>
+                  <option value="drink">Đồ uống thiên nhiên</option>
+                  <option value="all">Khác / Tổng hợp</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="p-price" class="label">Giá bán (VNĐ) <span class="text-red-500">*</span></label>
+                <input id="p-price" class="field" type="number" min="1" step="1000" required placeholder="Ví dụ: 250000">
+              </div>
+
+              <div>
+                <label for="p-origin" class="label">Xuất xứ / Nguồn gốc</label>
+                <input id="p-origin" class="field" placeholder="Ví dụ: Thị xã Nghĩa Lộ, Yên Bái">
+              </div>
+
+              <div>
+                <label for="p-pack" class="label">Quy cách đóng gói</label>
+                <input id="p-pack" class="field" placeholder="Ví dụ: Hộp hút chân không 500g">
+              </div>
+
+              <!-- KHU VỰC THÊM ẢNH SẢN PHẨM -->
+              <div class="sm:col-span-2 bg-[#f9faf7] p-5 rounded-xl border border-[#dbe5d8]">
+                <label class="label text-[#174d37] flex items-center gap-2 mb-3">
+                  <i data-lucide="image" class="w-5 h-5"></i> Thêm ảnh sản phẩm
+                </label>
+                
+                <div class="grid md:grid-cols-2 gap-4 items-start">
+                  <!-- Cột 1: Tải ảnh từ máy -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Cách 1: Tải ảnh từ máy tính / điện thoại</p>
+                    <div id="image-upload-zone" class="image-upload-zone">
+                      <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-[#174d37] mb-2"></i>
+                      <p class="text-sm font-bold text-[#173626]">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                      <p class="text-xs text-gray-400 mt-1">Định dạng JPG, PNG, WEBP (Tự động tối ưu)</p>
+                      <input type="file" id="p-image-file" accept="image/*" class="hidden">
+                    </div>
+                  </div>
+
+                  <!-- Cột 2: Nhập đường link URL ảnh -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Cách 2: Nhập URL ảnh online</p>
+                    <input id="p-image-url" type="url" class="field text-sm" placeholder="https://example.com/anh-san-pham.jpg">
+                    <p class="text-xs text-gray-400 mt-2">Dán liên kết ảnh từ Unsplash, Google Drive, hoặc host bất kỳ.</p>
+                  </div>
+                </div>
+
+                <!-- Khung xem trước ảnh đã chọn -->
+                <div id="image-preview-container" class="preview-container" hidden>
+                  <img id="image-preview" src="" alt="Xem trước ảnh">
+                  <button type="button" id="image-preview-remove" class="preview-remove-btn" title="Hủy ảnh">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="p-description" class="label">Mô tả sản phẩm</label>
+                <textarea id="p-description" class="field" rows="3" maxlength="600" placeholder="Giới thiệu về hương vị, đặc điểm và công dụng nổi bật của sản phẩm..."></textarea>
+              </div>
+
+              <p id="manage-status" class="sm:col-span-2 text-sm" role="status">Đang kết nối Database...</p>
+              
+              <button id="product-submit" type="submit" class="primary justify-self-start py-3 px-8 text-sm flex items-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i> Lưu sản phẩm vào Database
+              </button>
+            </form>
           </div>
 
-          <p id="manage-status" class="sm:col-span-2 text-sm" role="status">Đang kết nối Database...</p>
-          
-          <button id="product-submit" type="submit" class="primary justify-self-start py-3 px-8 text-sm flex items-center gap-2">
-            <i data-lucide="save" class="w-4 h-4"></i> Lưu sản phẩm vào Database
-          </button>
-        </form>
-      </div>
-
-      <!-- DANH SÁCH SẢN PHẨM HIỆN CÓ TRONG DATABASE -->
-      <div>
-        <h2 class="text-xl font-bold text-[#173626] mb-4 flex items-center gap-2">
-          <i data-lucide="list" class="w-5 h-5 text-[#174d37]"></i> Danh Sách Sản Phẩm Đang Lưu Trữ
-        </h2>
-        <div class="db-table-wrapper shadow-sm">
-          <table class="db-table">
-            <thead>
-              <tr>
-                <th class="w-12 text-center">STT</th>
-                <th class="w-16">Ảnh</th>
-                <th>Tên sản phẩm & Danh mục</th>
-                <th class="whitespace-nowrap">Giá niêm yết</th>
-                <th class="text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody id="manage-products-list"></tbody>
-          </table>
+          <!-- DANH SÁCH SẢN PHẨM HIỆN CÓ TRONG DATABASE -->
+          <div>
+            <h3 class="text-lg font-bold text-[#173626] mb-4 flex items-center gap-2">
+              <i data-lucide="list" class="w-5 h-5 text-[#174d37]"></i> Danh Sách Sản Phẩm Đang Lưu Trữ
+            </h3>
+            <div class="db-table-wrapper shadow-sm">
+              <table class="db-table">
+                <thead>
+                  <tr>
+                    <th class="w-12 text-center">STT</th>
+                    <th class="w-16">Ảnh</th>
+                    <th>Tên sản phẩm & Danh mục</th>
+                    <th class="whitespace-nowrap">Giá niêm yết</th>
+                    <th class="text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="manage-products-list"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -518,6 +725,9 @@
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-[#173626] text-white px-5 py-3 rounded-xl shadow-2xl max-w-[90%] text-sm font-semibold border border-green-700/40" hidden></div>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Custom Script -->
   <script src="script.js"></script>

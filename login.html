@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Nhập · YÊN BÌNH MARKET</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="w-full min-h-screen bg-[#fbfbf9] flex flex-col justify-between">
+
+  <!-- TOP HEADER -->
+  <header class="w-full bg-white border-b border-[#dbe5d8] py-4">
+    <div class="shell flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 text-left">
+        <span class="relative w-11 h-11 rounded-xl bg-[#e9c963] text-[#174d37] flex items-center justify-center shadow-sm">
+          <i data-lucide="mountain" class="w-6 h-6"></i>
+          <i data-lucide="leaf" class="w-3.5 h-3.5 absolute -top-1 -right-1 text-green-800"></i>
+        </span>
+        <span>
+          <strong class="block tracking-wide text-base md:text-lg text-[#173626] font-bold">YÊN BÌNH MARKET</strong>
+          <small class="block text-xs text-gray-500 font-medium">Đặc sản quê nhà · Nông sản sạch</small>
+        </span>
+      </a>
+
+      <a href="index.html" class="outline text-xs px-3.5 py-2 flex items-center gap-1.5 font-semibold text-[#174d37]">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Về trang chủ
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN LOGIN FORM -->
+  <main class="shell py-12 flex items-center justify-center flex-1">
+    <div class="w-full max-w-md bg-white rounded-3xl border border-[#dbe5d8] p-8 md:p-10 shadow-sm animate-rise">
+      
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-[#174d37] flex items-center justify-center mx-auto mb-3 border border-emerald-100">
+          <i data-lucide="log-in" class="w-7 h-7"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-[#173626]">Đăng Nhập Tài Khoản</h1>
+        <p class="text-xs text-gray-500 mt-1">Đăng nhập để tự động điền địa chỉ giao hàng và quản lý đơn hàng</p>
+      </div>
+
+      <!-- ERROR MESSAGE -->
+      <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+        <span id="login-error-msg"></span>
+      </div>
+
+      <!-- SUCCESS MESSAGE -->
+      <div id="login-success" class="hidden mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
+        <span id="login-success-msg">Đăng nhập thành công! Đang chuyển hướng...</span>
+      </div>
+
+      <!-- FORM -->
+      <form id="login-form" class="space-y-4" novalidate>
+        <div>
+          <label for="login-email" class="label">Email, Số điện thoại hoặc Tên đăng nhập <span class="text-red-500">*</span></label>
+          <input id="login-email" type="text" class="field" required placeholder="Nhập email, SĐT hoặc admin" autocomplete="username">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="login-password" class="label mb-0">Mật khẩu <span class="text-red-500">*</span></label>
+          </div>
+          <div class="relative">
+            <input id="login-password" type="password" class="field pr-10" required placeholder="••••••••" autocomplete="current-password">
+            <button type="button" id="toggle-pwd" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="Hiện/Ẩn mật khẩu">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-submit" class="primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm mt-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Đăng Nhập</span>
+        </button>
+      </form>
+
+      <!-- SWITCH TO REGISTER -->
+      <div class="mt-6 pt-5 border-t border-gray-100 text-center">
+        <p class="text-xs text-gray-500">
+          Chưa có tài khoản khách hàng? 
+          <a href="register.html" class="text-[#174d37] font-bold hover:underline">Đăng ký tài khoản mới</a>
+        </p>
+      </div>
+
+      <!-- DEMO ADMIN NOTE -->
+      <div class="mt-6 p-3.5 bg-amber-50 rounded-2xl border border-amber-200/80 text-xs text-amber-900">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <strong class="font-bold flex items-center gap-1 text-amber-800">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i> Tài khoản Quản trị viên (Admin):
+          </strong>
+          <button type="button" id="btn-fill-admin" class="text-[11px] bg-amber-200/80 hover:bg-amber-300 text-amber-950 font-bold px-2 py-0.5 rounded transition">
+            Điền nhanh Admin
+          </button>
+        </div>
+        <div class="text-[11px] space-y-0.5 text-amber-800">
+          <p>• Tên đăng nhập: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin</code> (hoặc <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin@yenbinhmarket.vn</code>)</p>
+          <p>• Mật khẩu: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin123</code></p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full py-4 text-center text-xs text-gray-400 border-t border-gray-100 bg-white">
+    © 2026 YÊN BÌNH MARKET. Nông sản sạch & Đặc sản vùng miền.
+  </footer>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    (() => {
+      const SUPABASE_URL = "https://sjvwoyehcfcseobenxmi.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_pX92oWJ-vlC3PfklnXk9BQ_uP0OH3kC";
+      const supabaseClient = (window.supabase && typeof window.supabase.createClient === "function")
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      // Lấy query param redirect nếu có
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get("redirect") || "";
+
+      const form = document.getElementById("login-form");
+      const emailInput = document.getElementById("login-email");
+      const passwordInput = document.getElementById("login-password");
+      const togglePwdBtn = document.getElementById("toggle-pwd");
+      const fillAdminBtn = document.getElementById("btn-fill-admin");
+      const errorBox = document.getElementById("login-error");
+      const errorMsg = document.getElementById("login-error-msg");
+      const successBox = document.getElementById("login-success");
+      const successMsg = document.getElementById("login-success-msg");
+      const submitBtn = document.getElementById("btn-submit");
+
+      // Khởi tạo icon Lucide
+      if (window.lucide) lucide.createIcons();
+
+      // Nút hiện/ẩn mật khẩu
+      if (togglePwdBtn) {
+        togglePwdBtn.addEventListener("click", () => {
+          const isPwd = passwordInput.type === "password";
+          passwordInput.type = isPwd ? "text" : "password";
+          togglePwdBtn.innerHTML = `<i data-lucide="${isPwd ? "eye-off" : "eye"}" class="w-4 h-4"></i>`;
+          if (window.lucide) lucide.createIcons();
+        });
+      }
+
+      // Nút điền nhanh Admin
+      if (fillAdminBtn) {
+        fillAdminBtn.addEventListener("click", () => {
+          emailInput.value = "admin@yenbinhmarket.vn";
+          passwordInput.value = "admin123";
+          errorBox.classList.add("hidden");
+        });
+      }
+
+      function showError(msg) {
+        errorMsg.textContent = msg;
+        errorBox.classList.remove("hidden");
+        successBox.classList.add("hidden");
+      }
+
+      function showSuccess(msg) {
+        successMsg.textContent = msg;
+        successBox.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorBox.classList.add("hidden");
+
+        const rawInput = emailInput.value.trim();
+        const cleanInput = rawInput.toLowerCase();
+        const password = passwordInput.value;
+
+        if (!rawInput || !password) {
+          showError("Vui lòng nhập đầy đủ Tên đăng nhập/Email/SĐT và Mật khẩu!");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Đang xác thực...</span>`;
+
+        try {
+          let user = null;
+
+          // 1. Kiểm tra tài khoản Admin mặc định (hỗ trợ cả 'admin' và 'admin@yenbinhmarket.vn')
+          if ((cleanInput === "admin" || cleanInput === "admin@yenbinhmarket.vn") && password === "admin123") {
+            user = {
+              id: "admin_001",
+              email: "admin@yenbinhmarket.vn",
+              fullName: "Quản Trị Viên",
+              phone: "0988 123 456",
+              address: "Thôn Tân Bình, Xã Yên Bình, Yên Bái",
+              role: "admin"
+            };
+          }
+
+          // 2. Tra cứu trong bảng users trên Supabase (tách riêng truy vấn email và phone để tránh lỗi ký tự đặc biệt)
+          if (!user && supabaseClient) {
+            try {
+              const { data: byEmail } = await supabaseClient
+                .from("users")
+                .select("*")
+                .eq("email", cleanInput)
+                .eq("password", password)
+                .maybeSingle();
+
+              if (byEmail) {
+                user = byEmail;
+              } else {
+                const { data: byPhone } = await supabaseClient
+                  .from("users")
+                  .select("*")
+                  .eq("phone", rawInput)
+                  .eq("password", password)
+                  .maybeSingle();
+
+                if (byPhone) user = byPhone;
+              }
+            } catch (supaErr) {
+              console.warn("Supabase tra cứu lỗi, chuyển sang kiểm tra bộ nhớ thiết bị:", supaErr);
+            }
+          }
+
+          // 3. Tra cứu trong danh sách người dùng lưu trên thiết bị (localStorage)
+          if (!user) {
+            const localUsers = JSON.parse(localStorage.getItem("yb_local_users") || "[]");
+            user = localUsers.find((u) => {
+              const matchEmail = u.email && u.email.trim().toLowerCase() === cleanInput;
+              const matchPhone = u.phone && u.phone.trim() === rawInput;
+              const matchName = u.fullName && u.fullName.trim().toLowerCase() === cleanInput;
+              return (matchEmail || matchPhone || matchName) && u.password === password;
+            });
+          }
+
+          if (!user) {
+            throw new Error("Tài khoản hoặc mật khẩu không chính xác! Nếu bạn chưa có tài khoản, vui lòng bấm 'Đăng ký tài khoản mới' bên dưới.");
+          }
+
+          // Lưu phiên đăng nhập vào localStorage
+          localStorage.setItem("yb_user", JSON.stringify(user));
+
+          // Đồng bộ giỏ hàng của khách vãng lai vào giỏ hàng riêng của user
+          try {
+            const guestCart = JSON.parse(localStorage.getItem("yb_cart_guest") || "{}");
+            const userCartKey = "yb_cart_" + user.id;
+            const userCart = JSON.parse(localStorage.getItem(userCartKey) || "{}");
+            for (const [prodId, qty] of Object.entries(guestCart)) {
+              userCart[prodId] = Math.min(99, (userCart[prodId] || 0) + (parseInt(qty, 10) || 1));
+            }
+            localStorage.setItem(userCartKey, JSON.stringify(userCart));
+            localStorage.removeItem("yb_cart_guest");
+          } catch (cartErr) {
+            console.warn("Lỗi đồng bộ giỏ hàng:", cartErr);
+          }
+
+          // Hiển thị thành công và điều hướng
+          showSuccess(`Xin chào ${user.fullName || user.email}! Đang chuyển hướng...`);
+          submitBtn.innerHTML = `<span>Đăng nhập thành công!</span>`;
+
+          setTimeout(() => {
+            if (user.role === "admin" || redirectTo === "manage") {
+              window.location.href = "index.html#manage";
+            } else if (redirectTo === "checkout") {
+              window.location.href = "index.html#checkout";
+            } else {
+              window.location.href = "index.html";
+            }
+          }, 400);
+
+        } catch (err) {
+          showError(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại!");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> <span>Đăng Nhập</span>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
