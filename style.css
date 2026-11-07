@@ -220,13 +220,13 @@ button:disabled {
   border-color: var(--green);
 }
 
-#catalog-section {
-  scroll-margin-top: 170px;
+#catalog-section, #products {
+  scroll-margin-top: 240px;
 }
 
 @media (max-width: 1024px) {
-  #catalog-section {
-    scroll-margin-top: 220px;
+  #catalog-section, #products {
+    scroll-margin-top: 290px;
   }
 }
 

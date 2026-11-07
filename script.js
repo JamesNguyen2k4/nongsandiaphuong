@@ -395,7 +395,7 @@ function toast(message) {
   toast.timer = setTimeout(() => (el.hidden = true), 3500);
 }
 
-// Cuộn mượt đến khu vực danh mục sản phẩm, tính toán trừ đi chiều cao header sticky và lề đệm
+// Cuộn mượt đến khu vực danh mục sản phẩm, tính toán khoảng đệm thoáng đãng tránh header nổi
 function scrollToProductsCatalog(immediate = false) {
   const homeView = $("home-view");
   const isAlreadyHome = homeView && !homeView.hidden;
@@ -414,16 +414,18 @@ function scrollToProductsCatalog(immediate = false) {
 
   const performScroll = () => {
     const header = document.querySelector("header");
-    // Chiều cao thực tế chính xác bao gồm thanh banner thông báo và menu
-    const headerHeight = header ? header.getBoundingClientRect().height : 155;
+    // Chiều cao thực tế chính xác bao gồm thanh banner thông báo, tìm kiếm và menu
+    const headerHeight = header ? Math.round(header.getBoundingClientRect().height) : 190;
     
-    // Tọa độ tuyệt đối của mục catalog tính từ đỉnh trang
-    const rect = target.getBoundingClientRect();
+    // Đo trực tiếp tọa độ phần tử tiêu đề danh mục ("DANH MỤC SẢN PHẨM")
+    const titleEl = target.querySelector("p") || target;
+    const titleRect = titleEl.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const targetTop = rect.top + scrollTop;
+    const titleAbsoluteTop = titleRect.top + scrollTop;
     
-    // Trừ thêm 24px lề đệm để tiêu đề "DANH MỤC SẢN PHẨM" không bao giờ bị che khuất bởi header nổi (sticky header)
-    const finalScrollTop = Math.max(0, targetTop - headerHeight - 24);
+    // Tạo khoảng cách thoáng đãng 48px giữa đáy header nổi và chữ "DANH MỤC SẢN PHẨM"
+    // Đảm bảo không bao giờ bị lẹm hoặc che khuất bởi thanh header nổi và bóng đổ của nó
+    const finalScrollTop = Math.max(0, titleAbsoluteTop - headerHeight - 48);
 
     window.scrollTo({
       top: finalScrollTop,
@@ -874,19 +876,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       selectedCategory = btn.dataset.category;
       filterProducts();
 
-      // Khi chọn danh mục, căn chỉnh góc nhìn sao cho tiêu đề danh mục luôn rõ nét, không bị che bởi header nổi
+      // Căn chỉnh góc nhìn: chỉ cuộn nếu tiêu đề đang bị che khuất hoặc nằm quá sát đáy header nổi
       const target = $("catalog-section");
       if (target) {
         const header = document.querySelector("header");
-        const headerHeight = header ? header.getBoundingClientRect().height : 155;
-        const rect = target.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const idealScroll = Math.max(0, rect.top + scrollTop - headerHeight - 24);
+        const headerHeight = header ? Math.round(header.getBoundingClientRect().height) : 190;
+        const titleEl = target.querySelector("p") || target;
+        const titleRect = titleEl.getBoundingClientRect();
 
-        // Chỉ cuộn nếu người dùng đang ở quá xa (ví dụ đang ở trên hero hoặc cuộn quá sâu dưới sản phẩm)
-        if (Math.abs(scrollTop - idealScroll) > 90) {
+        // Nếu phần đầu tiêu đề đang bị header nổi đè lên hoặc nằm quá sát đáy header (khoảng cách < 36px)
+        if (titleRect.top < headerHeight + 36) {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const titleAbsoluteTop = titleRect.top + scrollTop;
           window.scrollTo({
-            top: idealScroll,
+            top: Math.max(0, titleAbsoluteTop - headerHeight - 48),
             behavior: "smooth"
           });
         }
@@ -957,6 +960,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html?redirect=checkout";
         return;
       }
+    }
+    if (hash === "products") {
+      scrollToProductsCatalog();
+      return;
     }
     if (["home", "cart", "checkout", "about", "contact", "policy"].includes(hash)) {
       showView(hash);
