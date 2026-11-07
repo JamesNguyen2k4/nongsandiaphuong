@@ -146,20 +146,40 @@ class DatabaseService {
     return data || [];
   }
 
-  // Lấy danh sách đơn hàng của 1 khách hàng cụ thể
-  async getUserOrders(userId) {
-    if (!this.client || !userId) return [];
-    try {
-      const { data, error } = await this.client
-        .from("orders")
-        .select("*")
-        .eq("userId", userId)
-        .order("createdAt", { ascending: false });
-      if (error) return [];
-      return data || [];
-    } catch (err) {
-      return [];
+  // Lấy danh sách đơn hàng của 1 khách hàng cụ thể (kèm thông tin sản phẩm và trạng thái giao hàng)
+  async getUserOrders(user) {
+    if (!user) return [];
+    let orders = [];
+    const userId = user.id;
+    const phone = user.phone ? user.phone.trim() : "";
+    const name = user.fullName ? user.fullName.trim().toLowerCase() : "";
+
+    // 1. Tra cứu trực tuyến từ Supabase
+    if (this.client) {
+      try {
+        const all = await this.getAllOrders();
+        orders = all.filter((o) => {
+          if (o.userId && o.userId === userId) return true;
+          if (phone && o.customerPhone && o.customerPhone.trim() === phone) return true;
+          if (name && o.customerName && o.customerName.trim().toLowerCase() === name) return true;
+          return false;
+        });
+      } catch (err) {
+        console.warn("Lỗi khi tải đơn hàng từ Supabase:", err);
+      }
     }
+
+    // 2. Tra cứu dự phòng từ localStorage nếu chưa có mạng
+    const localKey = `yb_user_orders_${userId}`;
+    const localOrders = JSON.parse(localStorage.getItem(localKey) || "[]");
+    const combined = [...orders];
+    localOrders.forEach((lo) => {
+      if (!combined.some((o) => o.orderCode === lo.orderCode)) {
+        combined.push(lo);
+      }
+    });
+
+    return combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
   // Cập nhật trạng thái đơn hàng (dành cho Admin)
@@ -414,7 +434,23 @@ function showView(name, shouldScrollTop = true) {
   } else if (name === "cart") {
     renderCart();
   } else if (name === "checkout") {
+    if (!currentUser) {
+      toast("Vui lòng đăng nhập để tiến hành mua hàng!");
+      setTimeout(() => {
+        window.location.href = "login.html?redirect=checkout";
+      }, 400);
+      return;
+    }
     renderCheckout();
+  } else if (name === "orders") {
+    if (!currentUser) {
+      toast("Vui lòng đăng nhập để xem đơn hàng của bạn!");
+      setTimeout(() => {
+        window.location.href = "login.html?redirect=orders";
+      }, 400);
+      return;
+    }
+    loadAndRenderUserOrders();
   } else if (name === "manage") {
     if (!currentUser || currentUser.role !== "admin") {
       window.location.href = "login.html?redirect=manage";
@@ -697,6 +733,12 @@ function removeFromCart(id) {
 }
 
 function renderCheckout() {
+  if (!currentUser) {
+    toast("Vui lòng đăng nhập để tiến hành mua hàng!");
+    window.location.href = "login.html?redirect=checkout";
+    return;
+  }
+
   const box = $("checkout-items");
   box.innerHTML = "";
   const entries = getCartEntries();
@@ -713,30 +755,19 @@ function renderCheckout() {
 
   $("checkout-total").textContent = `Tổng thanh toán: ${money(getCartTotal())}`;
 
-  // Tự động cập nhật banner và điền thông tin khách hàng nếu đã đăng nhập
+  // Tự động điền thông tin khách hàng từ tài khoản
   const banner = $("checkout-auth-banner");
   if (banner) {
-    if (currentUser) {
-      banner.className = "p-4 rounded-xl text-sm flex flex-wrap items-center justify-between gap-3 border bg-emerald-50 border-emerald-200 text-emerald-900";
-      banner.innerHTML = `
-        <div class="flex items-center gap-2">
-          <i data-lucide="user-check" class="w-5 h-5 text-emerald-700"></i>
-          <span>Đang đặt hàng với tài khoản: <strong>${currentUser.fullName}</strong> (${currentUser.phone || "Chưa có SĐT"}). Địa chỉ và SĐT đã được điền sẵn từ tài khoản của bạn.</span>
-        </div>
-      `;
-      if (!$("customer-name").value) $("customer-name").value = currentUser.fullName || "";
-      if (!$("customer-phone").value) $("customer-phone").value = currentUser.phone || "";
-      if (!$("customer-address").value) $("customer-address").value = currentUser.address || "";
-    } else {
-      banner.className = "p-4 rounded-xl text-sm flex flex-wrap items-center justify-between gap-3 border bg-amber-50 border-amber-200 text-amber-900";
-      banner.innerHTML = `
-        <div class="flex items-center gap-2">
-          <i data-lucide="info" class="w-5 h-5 text-amber-700"></i>
-          <span>Bạn đã có tài khoản? <a href="login.html?redirect=checkout" class="underline font-bold text-amber-950 hover:text-green-800">Đăng nhập ngay</a> để tự động điền địa chỉ giao hàng.</span>
-        </div>
-        <a href="login.html?redirect=checkout" class="outline text-xs px-3 py-1.5 font-bold border-amber-300 text-amber-900 hover:bg-white inline-block">Đăng nhập ngay</a>
-      `;
-    }
+    banner.className = "p-4 rounded-xl text-sm flex flex-wrap items-center justify-between gap-3 border bg-emerald-50 border-emerald-200 text-emerald-900";
+    banner.innerHTML = `
+      <div class="flex items-center gap-2">
+        <i data-lucide="user-check" class="w-5 h-5 text-emerald-700"></i>
+        <span>Đang đặt hàng với tài khoản: <strong>${currentUser.fullName}</strong> (${currentUser.phone || "Chưa có SĐT"}). Thông tin nhận hàng đã được điền sẵn từ tài khoản của bạn.</span>
+      </div>
+    `;
+    if (!$("customer-name").value) $("customer-name").value = currentUser.fullName || "";
+    if (!$("customer-phone").value) $("customer-phone").value = currentUser.phone || "";
+    if (!$("customer-address").value) $("customer-address").value = currentUser.address || "";
     if (window.lucide) lucide.createIcons();
   }
 }
@@ -892,7 +923,215 @@ async function resetDatabaseToDefault() {
 }
 
 /* ========================================================
-   6. HỆ THỐNG QUẢN TRỊ ADMIN (Admin Portal)
+   6. QUẢN TRỊ ĐƠN HÀNG DÀNH CHO KHÁCH HÀNG (User Orders Portal)
+   ======================================================== */
+async function loadAndRenderUserOrders() {
+  const container = $("user-orders-list");
+  const greeting = $("user-orders-greeting");
+  if (!container) return;
+
+  if (greeting && currentUser) {
+    greeting.textContent = `Xin chào ${currentUser.fullName} (${currentUser.phone || currentUser.email})`;
+  }
+
+  container.innerHTML = `
+    <div class="text-center py-12 bg-white rounded-3xl border border-gray-100 text-gray-500 shadow-sm flex flex-col items-center justify-center gap-2">
+      <div class="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm">Đang tải lịch sử đơn hàng và trạng thái giao hàng mới nhất...</p>
+    </div>
+  `;
+
+  try {
+    const orders = await db.getUserOrders(currentUser);
+    renderUserOrders(orders);
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <div class="text-center py-10 bg-red-50 rounded-2xl border border-red-200 text-red-700 text-sm">
+        Không thể tải danh sách đơn hàng. Vui lòng kiểm tra lại kết nối mạng!
+      </div>
+    `;
+  }
+}
+
+function getStatusBadge(status) {
+  switch (status) {
+    case "Chờ xác nhận":
+      return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Chờ xác nhận (Shop đang liên hệ)
+        </span>
+      `;
+    case "Đang giao":
+      return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-300">
+          <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-600"></i> Đang giao hàng (Đang vận chuyển)
+        </span>
+      `;
+    case "Đã giao":
+    case "Hoàn thành":
+      return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Đã giao thành công
+        </span>
+      `;
+    case "Đã hủy":
+      return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-800 border border-red-300">
+          <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-600"></i> Đã hủy đơn
+        </span>
+      `;
+    default:
+      return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-700 border border-gray-300">
+          <i data-lucide="info" class="w-3.5 h-3.5"></i> ${status || "Đang xử lý"}
+        </span>
+      `;
+  }
+}
+
+function getDeliveryTimeline(status) {
+  if (status === "Đã hủy") {
+    return `
+      <div class="p-3 bg-red-50 rounded-xl border border-red-100 text-xs text-red-700 flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+        <span>Đơn hàng này đã bị hủy. Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ hotline: <strong>0988 123 456</strong>.</span>
+      </div>
+    `;
+  }
+
+  const isStep1Done = true;
+  const isStep2Done = status === "Đang giao" || status === "Đã giao" || status === "Hoàn thành";
+  const isStep3Done = status === "Đã giao" || status === "Hoàn thành";
+
+  return `
+    <div class="py-3 px-4 bg-gray-50/80 rounded-2xl border border-gray-200/80">
+      <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tiến trình vận chuyển đơn hàng:</p>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <div class="flex flex-col items-center">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep1Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"} mb-1 shadow-sm">
+            ✓
+          </div>
+          <span class="font-bold text-[#173626]">Đã nhận đơn</span>
+          <small class="text-[10px] text-gray-400">Shop tiếp nhận</small>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep2Done ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
+            ${isStep2Done ? "✓" : "2"}
+          </div>
+          <span class="font-bold ${isStep2Done ? "text-blue-900" : "text-gray-400"}">Đang giao hàng</span>
+          <small class="text-[10px] text-gray-400">Đang trên đường tới bạn</small>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep3Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
+            ${isStep3Done ? "✓" : "3"}
+          </div>
+          <span class="font-bold ${isStep3Done ? "text-emerald-900" : "text-gray-400"}">Đã giao hàng</span>
+          <small class="text-[10px] text-gray-400">Giao thành công</small>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderUserOrders(orders) {
+  const container = $("user-orders-list");
+  if (!container) return;
+
+  if (!orders || orders.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-16 bg-white rounded-3xl border border-[#dbe5d8] p-8 shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-[#174d37] flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+          <i data-lucide="package-open" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-[#173626]">Bạn chưa có đơn hàng nào</h3>
+        <p class="text-xs text-gray-500 mt-1 mb-6">Hãy dạo xem gian hàng đặc sản Tây Bắc và chọn món bạn yêu thích nhé!</p>
+        <button type="button" data-go="products" class="primary px-6 py-3 text-sm font-bold inline-flex items-center gap-2 shadow-sm">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Khám phá sản phẩm ngay
+        </button>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = orders.map((order) => {
+    const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }) : "Vừa xong";
+
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    const itemsHtml = items.map((item) => `
+      <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 text-xs">
+        <div class="flex items-center gap-3">
+          <span class="w-7 h-7 rounded-lg bg-emerald-50 text-[#174d37] font-bold flex items-center justify-center shrink-0 border border-emerald-100">
+            ${item.qty || 1}x
+          </span>
+          <div>
+            <strong class="text-gray-800 text-sm block">${item.name || "Sản phẩm"}</strong>
+            <small class="text-gray-400">Đơn giá: ${money(item.price || 0)}</small>
+          </div>
+        </div>
+        <span class="font-bold text-gray-800 text-sm">${money((item.price || 0) * (item.qty || 1))}</span>
+      </div>
+    `).join("");
+
+    return `
+      <article class="bg-white rounded-3xl border border-[#dbe5d8] p-6 md:p-7 shadow-sm space-y-4 animate-rise hover:shadow-md transition">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-base text-[#174d37]">${order.orderCode}</span>
+              <span class="text-xs text-gray-400">· Đặt lúc: ${dateStr}</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              Người nhận: <strong>${order.customerName}</strong> · SĐT: <strong>${order.customerPhone}</strong>
+            </p>
+          </div>
+          <div>
+            ${getStatusBadge(order.status)}
+          </div>
+        </div>
+
+        <!-- TIẾN TRÌNH GIAO HÀNG TRỰC QUAN -->
+        ${getDeliveryTimeline(order.status)}
+
+        <!-- DANH SÁCH MÓN HÀNG -->
+        <div class="bg-gray-50/70 p-4 rounded-2xl border border-gray-100">
+          <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Chi tiết sản phẩm đã mua:</p>
+          <div class="space-y-1">
+            ${itemsHtml || '<p class="text-xs text-gray-400">Không có thông tin chi tiết món</p>'}
+          </div>
+        </div>
+
+        <!-- ĐỊA CHỈ & TỔNG TIỀN -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
+          <div class="text-gray-600 max-w-md">
+            <p class="flex items-start gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-[#174d37] shrink-0 mt-0.5"></i>
+              <span><strong>Địa chỉ giao:</strong> ${order.customerAddress}</span>
+            </p>
+            ${order.customerNote ? `<p class="text-gray-400 italic mt-1 ml-5">Ghi chú: ${order.customerNote}</p>` : ""}
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-gray-400 block">Tổng tiền thanh toán khi nhận hàng:</span>
+            <strong class="text-xl font-bold text-[#173626]">${money(order.totalAmount || 0)}</strong>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ========================================================
+   7. HỆ THỐNG QUẢN TRỊ ADMIN (Admin Portal)
    ======================================================== */
 async function setupAdminPortal() {
   if (!currentUser || currentUser.role !== "admin") {
@@ -1205,6 +1444,7 @@ function updateAuthUI() {
   const accountBtn = $("account-button");
   const logoutBtn = $("header-logout-btn");
   const adminNav = $("nav-manage-btn");
+  const userOrdersNav = $("nav-user-orders-btn");
 
   if (currentUser) {
     if (label) label.textContent = currentUser.fullName || "Tài khoản";
@@ -1213,11 +1453,14 @@ function updateAuthUI() {
       accountBtn.onclick = () => {
         if (currentUser.role === "admin") {
           showView("manage");
+        } else {
+          showView("orders");
         }
       };
     }
     if (logoutBtn) logoutBtn.hidden = false;
     if (adminNav) adminNav.hidden = currentUser.role !== "admin";
+    if (userOrdersNav) userOrdersNav.hidden = currentUser.role === "admin";
   } else {
     if (label) label.textContent = "Đăng nhập";
     if (accountBtn) {
@@ -1226,6 +1469,7 @@ function updateAuthUI() {
     }
     if (logoutBtn) logoutBtn.hidden = true;
     if (adminNav) adminNav.hidden = true;
+    if (userOrdersNav) userOrdersNav.hidden = true;
   }
   if (window.lucide) lucide.createIcons();
 }
@@ -1309,19 +1553,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     const qty = parseInt($("detail-quantity").value) || 1;
     if (activeProductId) {
       addToCart(activeProductId, qty);
-      showView("cart");
+      if (!currentUser) {
+        toast("Vui lòng đăng nhập để tiến hành mua hàng!");
+        setTimeout(() => {
+          window.location.href = "login.html?redirect=checkout";
+        }, 400);
+        return;
+      }
+      showView("checkout");
     }
   };
 
-  // Nút chuyển sang thanh toán
+  // Nút chuyển sang thanh toán (bắt buộc đăng nhập trước khi mua hàng)
   $("checkout-button").onclick = () => {
-    if (getCartEntries().length) showView("checkout");
+    if (!getCartEntries().length) {
+      toast("Giỏ hàng của bạn đang trống!");
+      return;
+    }
+    if (!currentUser) {
+      toast("Vui lòng đăng nhập để tiến hành mua hàng!");
+      setTimeout(() => {
+        window.location.href = "login.html?redirect=checkout";
+      }, 400);
+      return;
+    }
+    showView("checkout");
   };
 
-  // Xử lý hash URL ngay lập tức (ví dụ sau khi đăng nhập chuyển về #checkout hoặc #manage)
+  // Nút làm mới đơn hàng khách hàng
+  if ($("btn-refresh-user-orders")) {
+    $("btn-refresh-user-orders").onclick = loadAndRenderUserOrders;
+  }
+
+  // Xử lý hash URL ngay lập tức (ví dụ sau khi đăng nhập chuyển về #checkout, #orders hoặc #manage)
   const applyHashRoute = () => {
     const hash = window.location.hash.replace("#", "").trim();
-    if (["home", "cart", "checkout", "manage"].includes(hash)) {
+    if (hash === "manage") {
+      if (!currentUser || currentUser.role !== "admin") {
+        window.location.href = "login.html?redirect=manage";
+        return;
+      }
+    }
+    if (hash === "checkout") {
+      if (!currentUser) {
+        window.location.href = "login.html?redirect=checkout";
+        return;
+      }
+    }
+    if (hash === "orders") {
+      if (!currentUser) {
+        window.location.href = "login.html?redirect=orders";
+        return;
+      }
+    }
+    if (["home", "cart", "checkout", "manage", "orders", "about", "contact", "policy"].includes(hash)) {
       showView(hash);
     }
   };
@@ -1360,6 +1645,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Submit đơn hàng (Chuyển trực tiếp tới Quản trị viên, không thanh toán)
   $("order-form").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    if (!currentUser) {
+      toast("Vui lòng đăng nhập để tiến hành mua hàng!");
+      setTimeout(() => {
+        window.location.href = "login.html?redirect=checkout";
+      }, 400);
+      return;
+    }
+
     const items = getCartEntries();
     if (!items.length) {
       toast("Giỏ hàng của bạn đang trống!");
@@ -1383,7 +1677,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const orderCode = "YB-" + Date.now().toString(36).toUpperCase();
     const orderData = {
       orderCode,
-      userId: currentUser ? currentUser.id : null,
+      userId: currentUser.id,
       customerName: name,
       customerPhone: phone,
       customerAddress: address,
@@ -1397,6 +1691,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       await db.createOrder(orderData);
+      
+      // Đồng thời lưu vào lịch sử đơn hàng của người dùng trên thiết bị
+      const userOrderKey = `yb_user_orders_${currentUser.id}`;
+      const userOrders = JSON.parse(localStorage.getItem(userOrderKey) || "[]");
+      userOrders.unshift(orderData);
+      localStorage.setItem(userOrderKey, JSON.stringify(userOrders));
+
       cart = {};
       saveCart();
       renderCartCount();

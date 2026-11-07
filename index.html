@@ -70,6 +70,9 @@
       <button type="button" data-go="products" class="nav-link">Sản phẩm</button>
       <button type="button" data-go="about" class="nav-link">Giới thiệu</button>
       <button type="button" data-go="contact" class="nav-link">Liên hệ</button>
+      <button type="button" id="nav-user-orders-btn" data-go="orders" class="nav-link text-[#174d37] font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200" hidden>
+        <i data-lucide="package-check" class="w-4 h-4 text-emerald-700"></i> Đơn Hàng Của Tôi
+      </button>
       <button type="button" id="nav-manage-btn" data-go="manage" class="nav-link text-[#174d37] font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200" hidden>
         <i data-lucide="shield-check" class="w-4 h-4 text-emerald-700"></i> Quản Trị Admin
       </button>
@@ -316,9 +319,14 @@
         <h1 class="text-3xl font-bold text-[#173626] mb-3">Đã Gửi Đơn Hàng Thành Công!</h1>
         <p class="muted mb-4">Đơn hàng của bạn đã được chuyển thẳng vào Database của Quản trị viên. Quản trị viên sẽ sớm liên hệ qua số điện thoại để xác nhận đơn hàng.</p>
         <p id="success-code" class="font-mono font-bold text-lg text-[#174d37] bg-green-50 p-3 rounded-xl border border-green-200 mb-6"></p>
-        <button type="button" data-go="home" class="primary">
-          Tiếp tục xem sản phẩm <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-        </button>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button type="button" data-go="orders" class="primary py-3 px-6 text-sm font-bold flex items-center gap-2">
+            <i data-lucide="package-check" class="w-4 h-4"></i> Xem Đơn Hàng & Trạng Thái Giao Hàng
+          </button>
+          <button type="button" data-go="home" class="outline py-3 px-6 text-sm font-semibold flex items-center gap-2">
+            Tiếp tục mua sắm <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -365,7 +373,35 @@
       <div id="policy-copy" class="bg-white rounded-2xl border p-8 max-w-3xl leading-relaxed text-gray-700 shadow-sm whitespace-pre-line"></div>
     </section>
 
-    <!-- 9. ADMIN PORTAL (QUẢN TRỊ VIÊN: ĐƠN HÀNG & SẢN PHẨM) -->
+    <!-- 9. USER ORDERS VIEW (ĐƠN HÀNG & TRẠNG THÁI GIAO HÀNG DÀNH CHO NGƯỜI DÙNG) -->
+    <section id="orders-view" class="view shell py-12" hidden>
+      <div class="max-w-4xl mx-auto">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 md:p-8 rounded-3xl border border-[#dbe5d8] shadow-sm">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="bg-emerald-100 text-[#174d37] text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Tài khoản khách hàng</span>
+              <span id="user-orders-greeting" class="text-xs text-gray-500 font-medium"></span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-[#173626] flex items-center gap-2">
+              <i data-lucide="package-check" class="w-7 h-7 text-[#174d37]"></i> Đơn Hàng Của Tôi & Trạng Thái Giao Hàng
+            </h1>
+            <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">Theo dõi chi tiết các sản phẩm bạn đã mua, tiền thanh toán và tiến độ giao hàng từ Yên Bình Market.</p>
+          </div>
+          <button id="btn-refresh-user-orders" type="button" class="outline text-xs px-4 py-2.5 flex items-center gap-2 font-bold text-[#174d37] hover:bg-emerald-50 rounded-xl">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Làm mới trạng thái
+          </button>
+        </div>
+
+        <!-- DANH SÁCH ĐƠN HÀNG -->
+        <div id="user-orders-list" class="space-y-6">
+          <div class="text-center py-12 bg-white rounded-3xl border border-gray-100 text-gray-500 shadow-sm">
+            Đang tải danh sách đơn hàng của bạn...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. ADMIN PORTAL (QUẢN TRỊ VIÊN: ĐƠN HÀNG & SẢN PHẨM) -->
     <section id="manage-view" class="view shell py-12" hidden>
       <!-- DASHBOARD: DÀNH RIÊNG CHO QUẢN TRỊ VIÊN -->
       <div id="admin-dashboard">
