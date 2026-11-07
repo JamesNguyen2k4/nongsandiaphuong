@@ -353,11 +353,6 @@ let cart = {}; // Giỏ hàng riêng biệt theo từng user/khách vãng lai
 let activeProductId = null;
 let searchTerm = "";
 let selectedCategory = "all";
-let currentImageBase64 = ""; // Giữ chuỗi ảnh đang chọn tải lên
-let adminOrders = [];
-let adminOrdersFilter = "all";
-let manualOrderDraftItems = [];
-let activeAdminTab = "orders";
 
 /* ========================================================
    3. HỖ TRỢ XỬ LÝ ẢNH (Image Resizing & FileReader)
@@ -442,21 +437,9 @@ function showView(name, shouldScrollTop = true) {
       return;
     }
     renderCheckout();
-  } else if (name === "orders") {
-    if (!currentUser) {
-      toast("Vui lòng đăng nhập để xem đơn hàng của bạn!");
-      setTimeout(() => {
-        window.location.href = "login.html?redirect=orders";
-      }, 400);
-      return;
-    }
-    loadAndRenderUserOrders();
-  } else if (name === "manage") {
-    if (!currentUser || currentUser.role !== "admin") {
-      window.location.href = "login.html?redirect=manage";
-      return;
-    }
-    setupAdminPortal();
+  } else if (name === "orders" || name === "manage") {
+    window.location.href = "orders.html";
+    return;
   }
 }
 
@@ -466,7 +449,6 @@ function showView(name, shouldScrollTop = true) {
 async function loadProductsFromDB() {
   currentProducts = await db.getAllProducts();
   renderProductsGrid();
-  renderManageList();
 }
 
 function renderProductsGrid() {
@@ -773,703 +755,42 @@ function renderCheckout() {
 }
 
 /* ========================================================
-   6. QUẢN LÝ SẢN PHẨM & CƠ SỞ DỮ LIỆU (DATABASE ADMIN)
-   ======================================================== */
-function setupImageUploadHandlers() {
-  const fileInput = $("p-image-file");
-  const urlInput = $("p-image-url");
-  const previewBox = $("image-preview-container");
-  const previewImg = $("image-preview");
-  const removeBtn = $("image-preview-remove");
-  const uploadZone = $("image-upload-zone");
-
-  // Xử lý kéo thả và click chọn file
-  uploadZone.addEventListener("click", () => fileInput.click());
-
-  uploadZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    uploadZone.classList.add("dragover");
-  });
-
-  uploadZone.addEventListener("dragleave", () => {
-    uploadZone.classList.remove("dragover");
-  });
-
-  uploadZone.addEventListener("drop", async (e) => {
-    e.preventDefault();
-    uploadZone.classList.remove("dragover");
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleSelectedImage(e.dataTransfer.files[0]);
-    }
-  });
-
-  // Khi chọn file ảnh từ máy
-  fileInput.addEventListener("change", async (e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleSelectedImage(e.target.files[0]);
-    }
-  });
-
-  // Khi nhập đường link URL ảnh trực tuyến
-  urlInput.addEventListener("input", () => {
-    const url = urlInput.value.trim();
-    if (url) {
-      currentImageBase64 = url;
-      previewImg.src = url;
-      previewBox.hidden = false;
-    } else {
-      currentImageBase64 = "";
-      previewBox.hidden = true;
-    }
-  });
-
-  // Nút xóa ảnh xem trước
-  removeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    currentImageBase64 = "";
-    fileInput.value = "";
-    urlInput.value = "";
-    previewBox.hidden = true;
-    previewImg.src = "";
-  });
-
-  async function handleSelectedImage(file) {
-    if (!file.type.startsWith("image/")) {
-      toast("Vui lòng chọn một tệp hình ảnh (JPG, PNG, WEBP)!");
-      return;
-    }
-    try {
-      toast("Đang tải và tối ưu ảnh...");
-      const compressedDataUrl = await compressAndReadImage(file);
-      currentImageBase64 = compressedDataUrl;
-      previewImg.src = compressedDataUrl;
-      previewBox.hidden = false;
-      urlInput.value = ""; // Xóa url nếu đã chọn file
-      toast("Đã thêm ảnh thành công!");
-    } catch (err) {
-      console.error(err);
-      toast("Lỗi khi xử lý hình ảnh.");
-    }
-  }
-}
-
-// Render bảng quản lý sản phẩm trong database
-function renderManageList() {
-  const listEl = $("manage-products-list");
-  if (!listEl) return;
-
-  $("db-total-count").textContent = `${currentProducts.length} sản phẩm trong Database`;
-
-  listEl.innerHTML = "";
-  if (!currentProducts.length) {
-    listEl.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500">Chưa có sản phẩm nào trong cơ sở dữ liệu.</td></tr>`;
-    return;
-  }
-
-  currentProducts.forEach((p, idx) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="font-bold text-gray-400 w-12 text-center">${idx + 1}</td>
-      <td class="w-16">
-        <img src="${p.image || "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=100&q=80"}" alt="${p.name}" class="table-thumb">
-      </td>
-      <td>
-        <div class="font-bold text-[#173626]">${p.name}</div>
-        <div class="text-xs text-gray-500">${p.category || "Chưa phân loại"} · ID: ${p.id}</div>
-      </td>
-      <td class="font-bold text-[#174d37] whitespace-nowrap">${money(p.price)}</td>
-      <td class="text-right whitespace-nowrap">
-        <button type="button" class="danger-btn" onclick="deleteProductFromDB('${p.id}')">
-          <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa
-        </button>
-      </td>
-    `;
-    listEl.appendChild(tr);
-  });
-
-  if (window.lucide) lucide.createIcons();
-}
-
-async function deleteProductFromDB(id) {
-  if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi cơ sở dữ liệu?")) return;
-  try {
-    await db.deleteProduct(id);
-    if (cart[id]) {
-      delete cart[id];
-      saveCart();
-      renderCartCount();
-    }
-    toast("Đã xóa sản phẩm thành công!");
-    await loadProductsFromDB();
-  } catch (err) {
-    console.error(err);
-    toast("Không thể xóa sản phẩm.");
-  }
-}
-
-async function resetDatabaseToDefault() {
-  if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ sản phẩm hiện tại trong Database?")) return;
-  try {
-    await db.resetToDefault();
-    cart = {};
-    saveCart();
-    renderCartCount();
-    toast("Đã dọn dẹp sạch toàn bộ sản phẩm trong Database!");
-    await loadProductsFromDB();
-  } catch (err) {
-    console.error(err);
-    toast("Lỗi khi xóa dữ liệu.");
-  }
-}
-
-/* ========================================================
-   6. QUẢN TRỊ ĐƠN HÀNG DÀNH CHO KHÁCH HÀNG (User Orders Portal)
-   ======================================================== */
-async function loadAndRenderUserOrders() {
-  const container = $("user-orders-list");
-  const greeting = $("user-orders-greeting");
-  if (!container) return;
-
-  if (greeting && currentUser) {
-    greeting.textContent = `Xin chào ${currentUser.fullName} (${currentUser.phone || currentUser.email})`;
-  }
-
-  container.innerHTML = `
-    <div class="text-center py-12 bg-white rounded-3xl border border-gray-100 text-gray-500 shadow-sm flex flex-col items-center justify-center gap-2">
-      <div class="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-sm">Đang tải lịch sử đơn hàng và trạng thái giao hàng mới nhất...</p>
-    </div>
-  `;
-
-  try {
-    const orders = await db.getUserOrders(currentUser);
-    renderUserOrders(orders);
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = `
-      <div class="text-center py-10 bg-red-50 rounded-2xl border border-red-200 text-red-700 text-sm">
-        Không thể tải danh sách đơn hàng. Vui lòng kiểm tra lại kết nối mạng!
-      </div>
-    `;
-  }
-}
-
-function getStatusBadge(status) {
-  switch (status) {
-    case "Chờ xác nhận":
-      return `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
-          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Chờ xác nhận (Shop đang liên hệ)
-        </span>
-      `;
-    case "Đang giao":
-      return `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-300">
-          <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-600"></i> Đang giao hàng (Đang vận chuyển)
-        </span>
-      `;
-    case "Đã giao":
-    case "Hoàn thành":
-      return `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Đã giao thành công
-        </span>
-      `;
-    case "Đã hủy":
-      return `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-800 border border-red-300">
-          <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-600"></i> Đã hủy đơn
-        </span>
-      `;
-    default:
-      return `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-700 border border-gray-300">
-          <i data-lucide="info" class="w-3.5 h-3.5"></i> ${status || "Đang xử lý"}
-        </span>
-      `;
-  }
-}
-
-function getDeliveryTimeline(status) {
-  if (status === "Đã hủy") {
-    return `
-      <div class="p-3 bg-red-50 rounded-xl border border-red-100 text-xs text-red-700 flex items-center gap-2">
-        <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
-        <span>Đơn hàng này đã bị hủy. Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ hotline: <strong>0988 123 456</strong>.</span>
-      </div>
-    `;
-  }
-
-  const isStep1Done = true;
-  const isStep2Done = status === "Đang giao" || status === "Đã giao" || status === "Hoàn thành";
-  const isStep3Done = status === "Đã giao" || status === "Hoàn thành";
-
-  return `
-    <div class="py-3 px-4 bg-gray-50/80 rounded-2xl border border-gray-200/80">
-      <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tiến trình vận chuyển đơn hàng:</p>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs">
-        <div class="flex flex-col items-center">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep1Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"} mb-1 shadow-sm">
-            ✓
-          </div>
-          <span class="font-bold text-[#173626]">Đã nhận đơn</span>
-          <small class="text-[10px] text-gray-400">Shop tiếp nhận</small>
-        </div>
-        <div class="flex flex-col items-center">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep2Done ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
-            ${isStep2Done ? "✓" : "2"}
-          </div>
-          <span class="font-bold ${isStep2Done ? "text-blue-900" : "text-gray-400"}">Đang giao hàng</span>
-          <small class="text-[10px] text-gray-400">Đang trên đường tới bạn</small>
-        </div>
-        <div class="flex flex-col items-center">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep3Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
-            ${isStep3Done ? "✓" : "3"}
-          </div>
-          <span class="font-bold ${isStep3Done ? "text-emerald-900" : "text-gray-400"}">Đã giao hàng</span>
-          <small class="text-[10px] text-gray-400">Giao thành công</small>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderUserOrders(orders) {
-  const container = $("user-orders-list");
-  if (!container) return;
-
-  if (!orders || orders.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-16 bg-white rounded-3xl border border-[#dbe5d8] p-8 shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-[#174d37] flex items-center justify-center mx-auto mb-4 border border-emerald-100">
-          <i data-lucide="package-open" class="w-8 h-8"></i>
-        </div>
-        <h3 class="text-lg font-bold text-[#173626]">Bạn chưa có đơn hàng nào</h3>
-        <p class="text-xs text-gray-500 mt-1 mb-6">Hãy dạo xem gian hàng đặc sản Tây Bắc và chọn món bạn yêu thích nhé!</p>
-        <button type="button" data-go="products" class="primary px-6 py-3 text-sm font-bold inline-flex items-center gap-2 shadow-sm">
-          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Khám phá sản phẩm ngay
-        </button>
-      </div>
-    `;
-    if (window.lucide) lucide.createIcons();
-    return;
-  }
-
-  container.innerHTML = orders.map((order) => {
-    const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    }) : "Vừa xong";
-
-    const items = Array.isArray(order.items) ? order.items : [];
-
-    const itemsHtml = items.map((item) => `
-      <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 text-xs">
-        <div class="flex items-center gap-3">
-          <span class="w-7 h-7 rounded-lg bg-emerald-50 text-[#174d37] font-bold flex items-center justify-center shrink-0 border border-emerald-100">
-            ${item.qty || 1}x
-          </span>
-          <div>
-            <strong class="text-gray-800 text-sm block">${item.name || "Sản phẩm"}</strong>
-            <small class="text-gray-400">Đơn giá: ${money(item.price || 0)}</small>
-          </div>
-        </div>
-        <span class="font-bold text-gray-800 text-sm">${money((item.price || 0) * (item.qty || 1))}</span>
-      </div>
-    `).join("");
-
-    return `
-      <article class="bg-white rounded-3xl border border-[#dbe5d8] p-6 md:p-7 shadow-sm space-y-4 animate-rise hover:shadow-md transition">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-mono font-bold text-base text-[#174d37]">${order.orderCode}</span>
-              <span class="text-xs text-gray-400">· Đặt lúc: ${dateStr}</span>
-            </div>
-            <p class="text-xs text-gray-500 mt-1">
-              Người nhận: <strong>${order.customerName}</strong> · SĐT: <strong>${order.customerPhone}</strong>
-            </p>
-          </div>
-          <div>
-            ${getStatusBadge(order.status)}
-          </div>
-        </div>
-
-        <!-- TIẾN TRÌNH GIAO HÀNG TRỰC QUAN -->
-        ${getDeliveryTimeline(order.status)}
-
-        <!-- DANH SÁCH MÓN HÀNG -->
-        <div class="bg-gray-50/70 p-4 rounded-2xl border border-gray-100">
-          <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Chi tiết sản phẩm đã mua:</p>
-          <div class="space-y-1">
-            ${itemsHtml || '<p class="text-xs text-gray-400">Không có thông tin chi tiết món</p>'}
-          </div>
-        </div>
-
-        <!-- ĐỊA CHỈ & TỔNG TIỀN -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
-          <div class="text-gray-600 max-w-md">
-            <p class="flex items-start gap-1.5">
-              <i data-lucide="map-pin" class="w-4 h-4 text-[#174d37] shrink-0 mt-0.5"></i>
-              <span><strong>Địa chỉ giao:</strong> ${order.customerAddress}</span>
-            </p>
-            ${order.customerNote ? `<p class="text-gray-400 italic mt-1 ml-5">Ghi chú: ${order.customerNote}</p>` : ""}
-          </div>
-          <div class="text-right">
-            <span class="text-xs text-gray-400 block">Tổng tiền thanh toán khi nhận hàng:</span>
-            <strong class="text-xl font-bold text-[#173626]">${money(order.totalAmount || 0)}</strong>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-
-  if (window.lucide) lucide.createIcons();
-}
-
-/* ========================================================
-   7. HỆ THỐNG QUẢN TRỊ ADMIN (Admin Portal)
-   ======================================================== */
-async function setupAdminPortal() {
-  if (!currentUser || currentUser.role !== "admin") {
-    window.location.href = "login.html?redirect=manage";
-    return;
-  }
-
-  const greetingEl = $("admin-greeting");
-  if (greetingEl) greetingEl.textContent = `(Xin chào, ${currentUser.fullName})`;
-  
-  // Nạp danh sách đơn hàng và danh sách sản phẩm
-  switchAdminTab(activeAdminTab || "orders");
-  await loadAdminOrders();
-  initManualOrderProductsDropdown();
-  renderManageList();
-}
-
-function switchAdminTab(tabName) {
-  activeAdminTab = tabName;
-  const tabs = ["orders", "new-order", "products"];
-  
-  tabs.forEach((t) => {
-    const btn = $(`tab-btn-${t}`);
-    const panel = $(`panel-admin-${t}`);
-    const isActive = t === tabName;
-    if (btn) {
-      if (isActive) {
-        btn.className = "admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 bg-[#174d37] text-white shadow-sm";
-      } else {
-        btn.className = "admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60";
-      }
-    }
-    if (panel) panel.hidden = !isActive;
-  });
-  if (window.lucide) lucide.createIcons();
-}
-
-async function loadAdminOrders() {
-  try {
-    adminOrders = await db.getAllOrders();
-    $("badge-total-orders").textContent = adminOrders.length;
-    renderAdminOrders(adminOrdersFilter);
-  } catch (err) {
-    console.error("Lỗi khi tải danh sách đơn hàng:", err);
-    $("admin-orders-list").innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500">Không thể tải danh sách đơn hàng từ Supabase. Vui lòng kiểm tra kết nối mạng.</td></tr>`;
-  }
-}
-
-function renderAdminOrders(filterStatus = "all") {
-  adminOrdersFilter = filterStatus;
-  const tbody = $("admin-orders-list");
-  if (!tbody) return;
-
-  // Cập nhật trạng thái nút lọc
-  document.querySelectorAll(".order-filter-btn").forEach((btn) => {
-    const isAct = btn.dataset.status === filterStatus;
-    btn.className = isAct
-      ? "order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-[#174d37] text-white"
-      : "order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50";
-  });
-
-  const filtered = filterStatus === "all"
-    ? adminOrders
-    : adminOrders.filter((o) => o.status === filterStatus);
-
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">Không có đơn hàng nào ${filterStatus !== "all" ? `ở trạng thái "${filterStatus}"` : ""}.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = "";
-  filtered.forEach((order) => {
-    const tr = document.createElement("tr");
-    
-    // Parse ngày giờ
-    const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" }) : "Vừa xong";
-    
-    // Parse danh sách món
-    const itemsList = Array.isArray(order.items)
-      ? order.items.map((it) => `<div class="text-xs text-gray-700 font-medium">• ${it.name} <span class="text-gray-500 font-bold">x${it.qty || 1}</span></div>`).join("")
-      : `<div class="text-xs text-gray-400 italic">Chi tiết không xác định</div>`;
-
-    // Màu trạng thái
-    let statusColor = "bg-amber-100 text-amber-800 border-amber-300";
-    if (order.status === "Đang giao") statusColor = "bg-blue-100 text-blue-800 border-blue-300";
-    if (order.status === "Hoàn thành") statusColor = "bg-green-100 text-green-800 border-green-300";
-    if (order.status === "Đã hủy") statusColor = "bg-red-100 text-red-800 border-red-300";
-
-    tr.innerHTML = `
-      <td>
-        <strong class="text-xs text-[#173626] block font-mono">${order.orderCode || "YB-" + order.id}</strong>
-        <span class="text-[11px] text-gray-400">${dateStr}</span>
-      </td>
-      <td>
-        <div class="font-bold text-sm text-[#173626]">${order.customerName || "Khách hàng"}</div>
-        <a href="tel:${order.customerPhone}" class="text-xs text-[#174d37] hover:underline font-semibold block mt-0.5">
-          <i data-lucide="phone" class="w-3 h-3 inline mr-1"></i>${order.customerPhone || "Chưa có SĐT"}
-        </a>
-      </td>
-      <td class="max-w-xs text-xs text-gray-600">
-        <div>${order.customerAddress || "Chưa có địa chỉ"}</div>
-        ${order.customerNote ? `<div class="text-[11px] text-amber-700 italic mt-1 bg-amber-50 p-1 rounded">Ghi chú: ${order.customerNote}</div>` : ""}
-      </td>
-      <td class="min-w-[180px]">
-        ${itemsList}
-      </td>
-      <td class="whitespace-nowrap font-bold text-sm text-[#174d37]">
-        ${money(order.totalAmount || 0)}
-        <span class="block text-[11px] font-normal text-gray-500">${order.paymentMethod || "COD"}</span>
-      </td>
-      <td class="whitespace-nowrap">
-        <select class="text-xs font-bold py-1 px-2 rounded-lg border ${statusColor} outline-none cursor-pointer" onchange="updateOrderStatusInDB('${order.id}', this.value)">
-          <option value="Chờ xác nhận" ${order.status === "Chờ xác nhận" ? "selected" : ""}>Chờ xác nhận</option>
-          <option value="Đang giao" ${order.status === "Đang giao" ? "selected" : ""}>Đang giao</option>
-          <option value="Hoàn thành" ${order.status === "Hoàn thành" ? "selected" : ""}>Hoàn thành</option>
-          <option value="Đã hủy" ${order.status === "Đã hủy" ? "selected" : ""}>Đã hủy</option>
-        </select>
-      </td>
-      <td class="text-right whitespace-nowrap">
-        <button type="button" class="danger-btn text-xs px-2.5 py-1" onclick="deleteOrderInDB('${order.id}')" title="Xóa đơn hàng này">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        </button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  if (window.lucide) lucide.createIcons();
-}
-
-async function updateOrderStatusInDB(orderId, newStatus) {
-  try {
-    toast(`Đang cập nhật trạng thái đơn sang "${newStatus}"...`);
-    await db.updateOrderStatus(orderId, newStatus);
-    const order = adminOrders.find((o) => String(o.id) === String(orderId));
-    if (order) order.status = newStatus;
-    toast(`Cập nhật đơn hàng thành công!`);
-    renderAdminOrders(adminOrdersFilter);
-  } catch (err) {
-    console.error("Lỗi cập nhật trạng thái đơn:", err);
-    toast("Không thể cập nhật trạng thái đơn hàng.");
-  }
-}
-
-async function deleteOrderInDB(orderId) {
-  if (!confirm("Bạn có chắc chắn muốn xóa đơn hàng này khỏi Database?")) return;
-  try {
-    await db.deleteOrder(orderId);
-    adminOrders = adminOrders.filter((o) => String(o.id) !== String(orderId));
-    $("badge-total-orders").textContent = adminOrders.length;
-    toast("Đã xóa đơn hàng thành công!");
-    renderAdminOrders(adminOrdersFilter);
-  } catch (err) {
-    console.error("Lỗi xóa đơn hàng:", err);
-    toast("Không thể xóa đơn hàng.");
-  }
-}
-
-// KHỞI TẠO TẠO ĐƠN HÀNG THỦ CÔNG CHO ADMIN
-function initManualOrderProductsDropdown() {
-  const select = $("manual-order-product");
-  if (!select) return;
-  select.innerHTML = `<option value="">-- Chọn sản phẩm có trong kho --</option>`;
-  currentProducts.forEach((p) => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = `${p.name} - ${money(p.price)}`;
-    select.appendChild(opt);
-  });
-}
-
-function renderManualOrderItems() {
-  const box = $("manual-order-items-list");
-  const totalEl = $("manual-order-total");
-  if (!box) return;
-
-  if (!manualOrderDraftItems.length) {
-    box.innerHTML = `<p class="text-xs text-gray-400 italic">Chưa chọn sản phẩm nào.</p>`;
-    if (totalEl) totalEl.textContent = "0 ₫";
-    return;
-  }
-
-  let total = 0;
-  box.innerHTML = "";
-  manualOrderDraftItems.forEach((item, idx) => {
-    const lineTotal = item.product.price * item.qty;
-    total += lineTotal;
-    const div = document.createElement("div");
-    div.className = "flex items-center justify-between text-xs py-1.5 px-2 bg-white rounded border border-gray-200";
-    div.innerHTML = `
-      <div class="flex-1 min-w-0 pr-2">
-        <strong class="text-gray-800 truncate block">${item.product.name}</strong>
-        <span class="text-gray-400">${money(item.product.price)} × ${item.qty} = <span class="font-bold text-[#174d37]">${money(lineTotal)}</span></span>
-      </div>
-      <button type="button" class="text-red-600 hover:text-red-800 p-1 font-bold" onclick="removeManualOrderItem(${idx})" title="Xóa món này">
-        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-      </button>
-    `;
-    box.appendChild(div);
-  });
-  if (totalEl) totalEl.textContent = money(total);
-  if (window.lucide) lucide.createIcons();
-}
-
-function removeManualOrderItem(index) {
-  manualOrderDraftItems.splice(index, 1);
-  renderManualOrderItems();
-}
-
-/* ========================================================
-   7. HỆ THỐNG XÁC THỰC TÀI KHOẢN & PHÂN QUYỀN (Auth UI)
+   5. HỆ THỐNG XÁC THỰC TÀI KHOẢN & PHÂN QUYỀN (Auth UI)
    ======================================================== */
 function initAuthUI() {
   updateAuthUI();
-
-  // Nút đăng xuất trên header
   const headerLogoutBtn = $("header-logout-btn");
   if (headerLogoutBtn) headerLogoutBtn.onclick = logout;
-
-  // Nút đăng xuất trên trang Admin
-  const adminLogoutBtn = $("admin-logout-btn");
-  if (adminLogoutBtn) adminLogoutBtn.onclick = logout;
-
-  // Tab switcher admin
-  if ($("tab-btn-orders")) $("tab-btn-orders").onclick = () => switchAdminTab("orders");
-  if ($("tab-btn-new-order")) $("tab-btn-new-order").onclick = () => switchAdminTab("new-order");
-  if ($("tab-btn-products")) $("tab-btn-products").onclick = () => switchAdminTab("products");
-  if ($("btn-refresh-orders")) $("btn-refresh-orders").onclick = loadAdminOrders;
-
-  // Thêm món vào đơn thủ công
-  if ($("btn-add-item-to-manual-order")) {
-    $("btn-add-item-to-manual-order").onclick = () => {
-      const sel = $("manual-order-product");
-      const qty = parseInt($("manual-order-qty").value) || 1;
-      const prodId = sel.value;
-      if (!prodId) {
-        toast("Vui lòng chọn một sản phẩm từ kho!");
-        return;
-      }
-      const product = currentProducts.find((p) => p.id === prodId);
-      if (!product) return;
-
-      const existing = manualOrderDraftItems.find((it) => it.product.id === prodId);
-      if (existing) {
-        existing.qty += qty;
-      } else {
-        manualOrderDraftItems.push({ product, qty });
-      }
-      renderManualOrderItems();
-      toast(`Đã thêm "${product.name}" vào đơn!`);
-    };
-  }
-
-  // Submit tạo đơn hàng thủ công
-  const adminCreateOrderForm = $("admin-create-order-form");
-  if (adminCreateOrderForm) {
-    adminCreateOrderForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!manualOrderDraftItems.length) {
-        toast("Đơn hàng phải có ít nhất 1 sản phẩm!");
-        return;
-      }
-
-      const name = $("manual-customer-name").value.trim();
-      const phone = $("manual-customer-phone").value.trim();
-      const address = $("manual-customer-address").value.trim();
-      const payment = $("manual-payment").value;
-      const status = $("manual-status").value;
-      const note = $("manual-note").value.trim();
-
-      if (!name || !phone || !address) {
-        toast("Vui lòng điền đủ Tên, SĐT và Địa chỉ khách!");
-        return;
-      }
-
-      const total = manualOrderDraftItems.reduce((acc, it) => acc + (it.product.price * it.qty), 0);
-      const orderCode = "YB-ADM-" + Date.now().toString(36).toUpperCase();
-
-      const orderData = {
-        orderCode,
-        customerName: name,
-        customerPhone: phone,
-        customerAddress: address,
-        customerNote: note,
-        paymentMethod: payment,
-        items: manualOrderDraftItems.map((x) => ({ id: x.product.id, name: x.product.name, price: x.product.price, qty: x.qty })),
-        totalAmount: total,
-        status: status,
-        createdAt: new Date().toISOString()
-      };
-
-      try {
-        toast("Đang lưu đơn hàng lên Database...");
-        await db.createOrder(orderData);
-        toast("Tạo đơn hàng thủ công thành công!");
-        $("admin-create-order-form").reset();
-        manualOrderDraftItems = [];
-        renderManualOrderItems();
-        switchAdminTab("orders");
-        await loadAdminOrders();
-      } catch (err) {
-        console.error("Lỗi khi tạo đơn thủ công:", err);
-        toast("Không thể lưu đơn hàng vào Database.");
-      }
-    });
-  }
 }
 
 function updateAuthUI() {
   const label = $("account-btn-label");
   const accountBtn = $("account-button");
   const logoutBtn = $("header-logout-btn");
-  const adminNav = $("nav-manage-btn");
-  const userOrdersNav = $("nav-user-orders-btn");
+  const ordersLink = $("nav-orders-link");
+  const ordersLabel = $("nav-orders-label");
 
   if (currentUser) {
     if (label) label.textContent = currentUser.fullName || "Tài khoản";
     if (accountBtn) {
-      accountBtn.href = "javascript:void(0)";
-      accountBtn.onclick = () => {
-        if (currentUser.role === "admin") {
-          showView("manage");
-        } else {
-          showView("orders");
-        }
-      };
+      accountBtn.href = "orders.html";
+      accountBtn.onclick = null;
+    }
+    if (ordersLink) {
+      ordersLink.hidden = false;
+      if (ordersLabel) {
+        ordersLabel.textContent = currentUser.role === "admin" ? "Quản Trị Đơn Hàng" : "Đơn Hàng Của Tôi";
+      }
     }
     if (logoutBtn) logoutBtn.hidden = false;
-    if (adminNav) adminNav.hidden = currentUser.role !== "admin";
-    if (userOrdersNav) userOrdersNav.hidden = currentUser.role === "admin";
   } else {
     if (label) label.textContent = "Đăng nhập";
     if (accountBtn) {
       accountBtn.href = "login.html";
       accountBtn.onclick = null;
     }
+    if (ordersLink) ordersLink.hidden = true;
     if (logoutBtn) logoutBtn.hidden = true;
-    if (adminNav) adminNav.hidden = true;
-    if (userOrdersNav) userOrdersNav.hidden = true;
   }
   if (window.lucide) lucide.createIcons();
 }
@@ -1480,16 +801,13 @@ function logout() {
   loadCartForCurrentUser(false);
   toast("Đã đăng xuất tài khoản.");
   updateAuthUI();
-  if (!$("manage-view").hidden) {
-    showView("home");
-  }
   if (!$("checkout-view").hidden) {
     renderCheckout();
   }
 }
 
 /* ========================================================
-   8. KHỞI TẠO VÀ GẮN SỰ KIỆN (DOM Ready)
+   6. KHỞI TẠO VÀ GẮN SỰ KIỆN (DOM Ready)
    ======================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
   // Khởi tạo icon
@@ -1498,14 +816,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Cập nhật lại currentUser mới nhất từ localStorage
   currentUser = JSON.parse(localStorage.getItem("yb_user") || "null");
 
-  // Khởi tạo hệ thống xác thực tài khoản & Quản trị ngay lập tức
+  // Khởi tạo hệ thống xác thực tài khoản
   initAuthUI();
 
   // Tải giỏ hàng riêng biệt theo user hiện tại
   loadCartForCurrentUser(false);
-
-  // Khởi tạo sự kiện upload ảnh
-  setupImageUploadHandlers();
 
   // Điều hướng trang theo data-go
   document.querySelectorAll("[data-go]").forEach((btn) => {
@@ -1580,19 +895,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     showView("checkout");
   };
 
-  // Nút làm mới đơn hàng khách hàng
-  if ($("btn-refresh-user-orders")) {
-    $("btn-refresh-user-orders").onclick = loadAndRenderUserOrders;
-  }
-
-  // Xử lý hash URL ngay lập tức (ví dụ sau khi đăng nhập chuyển về #checkout, #orders hoặc #manage)
+  // Xử lý hash URL ngay lập tức
   const applyHashRoute = () => {
     const hash = window.location.hash.replace("#", "").trim();
-    if (hash === "manage") {
-      if (!currentUser || currentUser.role !== "admin") {
-        window.location.href = "login.html?redirect=manage";
-        return;
-      }
+    if (hash === "manage" || hash === "orders") {
+      window.location.href = "orders.html";
+      return;
     }
     if (hash === "checkout") {
       if (!currentUser) {
@@ -1600,13 +908,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
     }
-    if (hash === "orders") {
-      if (!currentUser) {
-        window.location.href = "login.html?redirect=orders";
-        return;
-      }
-    }
-    if (["home", "cart", "checkout", "manage", "orders", "about", "contact", "policy"].includes(hash)) {
+    if (["home", "cart", "checkout", "about", "contact", "policy"].includes(hash)) {
       showView(hash);
     }
   };
@@ -1616,20 +918,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Khởi tạo cơ sở dữ liệu Supabase và tải sản phẩm
   try {
     await db.init();
-    $("manage-status").textContent = "Cơ sở dữ liệu Supabase Cloud Database đã kết nối thành công!";
-    $("manage-status").className = "sm:col-span-2 text-sm text-[#174d37] font-semibold";
     await loadProductsFromDB();
-    if (!$("manage-view").hidden && currentUser && currentUser.role === "admin") {
-      initManualOrderProductsDropdown();
-      renderManageList();
-    }
   } catch (err) {
     console.error("Lỗi khởi tạo Supabase:", err);
-    $("manage-status").textContent = "Chưa kết nối được bảng Supabase. Hãy chạy mã SQL tạo bảng trong SQL Editor trên Supabase!";
-    $("manage-status").className = "sm:col-span-2 text-sm text-amber-700 font-semibold";
     currentProducts = initialProducts;
     renderProductsGrid();
-    renderManageList();
   }
 
   // Xem chính sách
@@ -1692,7 +985,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       await db.createOrder(orderData);
       
-      // Đồng thời lưu vào lịch sử đơn hàng của người dùng trên thiết bị
       const userOrderKey = `yb_user_orders_${currentUser.id}`;
       const userOrders = JSON.parse(localStorage.getItem(userOrderKey) || "[]");
       userOrders.unshift(orderData);
@@ -1714,69 +1006,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (window.lucide) lucide.createIcons();
     }
   });
-
-  // SUBMIT THÊM SẢN PHẨM MỚI KÈM HÌNH ẢNH VÀO DATABASE
-  $("product-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const submitBtn = $("product-submit");
-    const name = $("p-name").value.trim();
-    const category = $("p-category").value.trim();
-    const price = Number($("p-price").value);
-    const desc = $("p-description").value.trim();
-    const origin = $("p-origin").value.trim();
-    const pack = $("p-pack").value.trim();
-    const group = $("p-group").value || "all";
-
-    if (!name || !price) {
-      toast("Vui lòng điền đầy đủ Tên và Giá sản phẩm!");
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Đang lưu vào Database...";
-
-    // Tự sinh ID sản phẩm duy nhất
-    const newId = "prod_" + Date.now();
-
-    // Ảnh sản phẩm: ưu tiên ảnh vừa chọn tải lên, nếu không có thì dùng ảnh mặc định theo danh mục
-    let productImg = currentImageBase64;
-    if (!productImg) {
-      productImg = "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80";
-    }
-
-    const newProduct = {
-      id: newId,
-      name,
-      category: category || "Đặc sản",
-      group,
-      price,
-      image: productImg,
-      description: desc || "Sản phẩm đặc sản thiên nhiên nguyên chất.",
-      features: "Được kiểm duyệt chất lượng nghiêm ngặt trước khi xuất bán.",
-      ingredients: "100% nguyên liệu tự nhiên chọn lọc.",
-      origin: origin || "Việt Nam",
-      pack: pack || "Đóng gói tiêu chuẩn",
-      usage: "Dùng trực tiếp hoặc chế biến theo sở thích.",
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      await db.addProduct(newProduct);
-      $("product-form").reset();
-      currentImageBase64 = "";
-      $("image-preview-container").hidden = true;
-      $("image-preview").src = "";
-      toast("Thêm sản phẩm và hình ảnh vào Database thành công!");
-      await loadProductsFromDB();
-    } catch (err) {
-      console.error(err);
-      toast("Lỗi khi lưu sản phẩm vào cơ sở dữ liệu.");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Lưu sản phẩm vào Database";
-    }
-  });
-
-  // Nút reset database
-  $("btn-reset-db").addEventListener("click", resetDatabaseToDefault);
 });

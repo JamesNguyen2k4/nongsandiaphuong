@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Đơn Hàng · YÊN BÌNH MARKET</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="w-full min-h-screen bg-[#fbfbf9] flex flex-col justify-between">
+
+  <!-- TOP HEADER -->
+  <header class="w-full bg-white border-b border-[#dbe5d8] py-4 sticky top-0 z-30 shadow-sm">
+    <div class="shell flex flex-wrap items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-3 text-left">
+        <span class="relative w-11 h-11 rounded-xl bg-[#e9c963] text-[#174d37] flex items-center justify-center shadow-sm">
+          <i data-lucide="mountain" class="w-6 h-6"></i>
+          <i data-lucide="leaf" class="w-3.5 h-3.5 absolute -top-1 -right-1 text-green-800"></i>
+        </span>
+        <span>
+          <strong class="block tracking-wide text-base md:text-lg text-[#173626] font-bold">YÊN BÌNH MARKET</strong>
+          <small class="block text-xs text-gray-500 font-medium">Cổng Quản Lý & Theo Dõi Đơn Hàng</small>
+        </span>
+      </a>
+
+      <!-- USER ACTIONS -->
+      <div class="flex items-center gap-3">
+        <span id="header-user-badge" class="text-xs bg-emerald-50 text-[#174d37] font-bold px-3 py-1.5 rounded-full border border-emerald-200 flex items-center gap-1.5">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span id="header-user-name">Đang tải...</span>
+        </span>
+        <button id="btn-logout" type="button" class="outline text-xs px-3 py-1.5 text-red-600 border-red-200 hover:bg-red-50 flex items-center gap-1 font-semibold" title="Đăng xuất">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Đăng xuất</span>
+        </button>
+        <a href="index.html" class="primary text-xs px-3.5 py-1.5 flex items-center gap-1.5 font-bold shadow-sm">
+          <i data-lucide="store" class="w-4 h-4"></i> Về cửa hàng
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="shell py-10 flex-1">
+
+    <!-- ==========================================
+         A. GIAO DIỆN DÀNH CHO KHÁCH HÀNG (CUSTOMER)
+         ========================================== -->
+    <section id="customer-section" class="max-w-4xl mx-auto" hidden>
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 md:p-8 rounded-3xl border border-[#dbe5d8] shadow-sm">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="bg-emerald-100 text-[#174d37] text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Tài khoản khách hàng</span>
+            <span id="cust-phone-badge" class="text-xs text-gray-500 font-medium"></span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-[#173626] flex items-center gap-2">
+            <i data-lucide="package-check" class="w-7 h-7 text-[#174d37]"></i> Đơn Hàng Của Tôi & Trạng Thái Giao Hàng
+          </h1>
+          <p class="text-xs text-gray-500 mt-1.5">Theo dõi chi tiết sản phẩm bạn đã đặt mua và hành trình giao nhận từ Yên Bình Market.</p>
+        </div>
+        <button id="btn-refresh-cust-orders" type="button" class="outline text-xs px-4 py-2.5 flex items-center gap-2 font-bold text-[#174d37] hover:bg-emerald-50 rounded-xl">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Làm mới đơn hàng
+        </button>
+      </div>
+
+      <!-- DANH SÁCH ĐƠN HÀNG CỦA KHÁCH -->
+      <div id="cust-orders-list" class="space-y-6">
+        <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 text-gray-500 shadow-sm flex flex-col items-center justify-center gap-2">
+          <div class="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-sm">Đang tải danh sách đơn hàng của bạn...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         B. GIAO DIỆN DÀNH CHO QUẢN TRỊ VIÊN (ADMIN)
+         ========================================== -->
+    <section id="admin-section" class="space-y-6" hidden>
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-6 md:p-8 rounded-3xl border border-[#dbe5d8] shadow-sm">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="bg-emerald-700 text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Quản Trị Viên</span>
+            <span id="admin-greeting" class="text-xs text-gray-500"></span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-[#173626] flex items-center gap-2">
+            <i data-lucide="layout-dashboard" class="w-7 h-7 text-[#174d37]"></i> Bảng Quản Trị Đơn Hàng & Cửa Hàng
+          </h1>
+          <p class="text-xs text-gray-500 mt-1">Cập nhật trạng thái giao hàng, tạo đơn thủ công và quản lý cơ sở dữ liệu sản phẩm.</p>
+        </div>
+      </div>
+
+      <!-- ADMIN TABS -->
+      <div class="flex flex-wrap gap-2 bg-gray-100 p-1.5 rounded-2xl border border-gray-200">
+        <button type="button" id="tab-btn-orders" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-[#174d37] text-white shadow-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>Tất Cả Đơn Hàng</span>
+          <span id="badge-total-orders" class="bg-[#e9c963] text-[#174d37] text-xs px-2 py-0.5 rounded-full font-extrabold">0</span>
+        </button>
+        <button type="button" id="tab-btn-new-order" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ Tạo Đơn Thủ Công</span>
+        </button>
+        <button type="button" id="tab-btn-products" class="admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span>Quản Lý Kho Sản Phẩm</span>
+          <span id="badge-total-products" class="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+        </button>
+      </div>
+
+      <!-- 1. TAB: TẤT CẢ ĐƠN HÀNG -->
+      <div id="panel-admin-orders" class="bg-white rounded-3xl border border-[#dbe5d8] p-6 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Lọc trạng thái:</span>
+            <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-[#174d37] text-white" data-status="all">Tất cả</button>
+            <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Chờ xác nhận">Chờ xác nhận</button>
+            <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Đang giao">Đang giao</button>
+            <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Hoàn thành">Đã giao</button>
+            <button type="button" class="order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50" data-status="Đã hủy">Đã hủy</button>
+          </div>
+          <button id="btn-refresh-admin-orders" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới danh sách
+          </button>
+        </div>
+
+        <div class="db-table-wrapper shadow-sm rounded-2xl overflow-hidden border">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th class="w-32">Mã & Ngày đặt</th>
+                <th>Khách hàng & SĐT</th>
+                <th>Địa chỉ nhận</th>
+                <th>Sản phẩm đặt</th>
+                <th class="whitespace-nowrap">Tổng tiền</th>
+                <th class="whitespace-nowrap">Trạng thái giao</th>
+                <th class="text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-list">
+              <tr><td colspan="7" class="text-center py-8 text-gray-500">Đang tải danh sách đơn hàng...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. TAB: TẠO ĐƠN HÀNG THỦ CÔNG -->
+      <div id="panel-admin-new-order" class="bg-white rounded-3xl border border-[#dbe5d8] p-6 md:p-8 shadow-sm max-w-4xl" hidden>
+        <h2 class="text-xl font-bold text-[#173626] mb-2 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-[#174d37]"></i> Tạo Đơn Hàng Thủ Công (Khách gọi điện / Zalo)
+        </h2>
+        <p class="text-sm text-gray-500 mb-6">Dành cho Admin khi tiếp nhận đơn hàng bên ngoài website, đơn sẽ được ghi nhận vào Supabase Database.</p>
+
+        <form id="admin-create-order-form" class="grid sm:grid-cols-2 gap-5" novalidate>
+          <div class="sm:col-span-2 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+            <label class="label text-[#174d37] font-bold mb-2 block">1. Chọn sản phẩm thêm vào đơn</label>
+            <div class="flex flex-wrap gap-2 items-end">
+              <div class="flex-1 min-w-[220px]">
+                <select id="manual-order-product" class="field text-sm">
+                  <option value="">-- Chọn sản phẩm có trong kho --</option>
+                </select>
+              </div>
+              <div class="w-24">
+                <input id="manual-order-qty" type="number" min="1" max="99" value="1" class="field text-sm" placeholder="SL">
+              </div>
+              <button type="button" id="btn-add-item-to-manual-order" class="outline px-4 py-2.5 text-sm font-bold flex items-center gap-1.5 bg-white">
+                <i data-lucide="plus" class="w-4 h-4"></i> Thêm món
+              </button>
+            </div>
+
+            <div id="manual-order-items-box" class="mt-4 pt-3 border-t border-gray-200">
+              <p class="text-xs text-gray-500 font-semibold mb-2">Các món trong đơn:</p>
+              <div id="manual-order-items-list" class="space-y-2 text-sm">
+                <p class="text-xs text-gray-400 italic">Chưa chọn sản phẩm nào.</p>
+              </div>
+              <div class="mt-3 pt-2 border-t flex justify-between font-bold text-[#174d37] text-sm">
+                <span>Tổng tiền đơn hàng:</span>
+                <span id="manual-order-total">0 ₫</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="label text-[#174d37] font-bold mb-1 block">2. Thông tin khách hàng</label>
+          </div>
+          <div>
+            <label for="manual-customer-name" class="label">Họ và tên khách hàng <span class="text-red-500">*</span></label>
+            <input id="manual-customer-name" class="field text-sm" required placeholder="Ví dụ: Anh Nam">
+          </div>
+          <div>
+            <label for="manual-customer-phone" class="label">Số điện thoại liên hệ <span class="text-red-500">*</span></label>
+            <input id="manual-customer-phone" class="field text-sm" required placeholder="Ví dụ: 0912 345 678">
+          </div>
+          <div class="sm:col-span-2">
+            <label for="manual-customer-address" class="label">Địa chỉ nhận hàng chi tiết <span class="text-red-500">*</span></label>
+            <input id="manual-customer-address" class="field text-sm" required placeholder="Số nhà, đường, thôn/xã, tỉnh/thành phố">
+          </div>
+          <div>
+            <label for="manual-order-status" class="label">Trạng thái đơn hàng</label>
+            <select id="manual-order-status" class="field text-sm">
+              <option value="Chờ xác nhận" selected>Chờ xác nhận</option>
+              <option value="Đang giao">Đang giao</option>
+              <option value="Hoàn thành">Đã giao</option>
+              <option value="Đã hủy">Đã hủy</option>
+            </select>
+          </div>
+          <div>
+            <label for="manual-customer-note" class="label">Ghi chú đơn hàng</label>
+            <input id="manual-customer-note" class="field text-sm" placeholder="Khách hẹn giờ nhận, dặn dò...">
+          </div>
+
+          <div class="sm:col-span-2 pt-2">
+            <button type="submit" id="btn-submit-manual-order" class="primary py-3 px-8 text-sm font-bold flex items-center gap-2">
+              <i data-lucide="check" class="w-4 h-4"></i> Lưu Đơn Hàng Lên Database
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 3. TAB: QUẢN LÝ KHO SẢN PHẨM -->
+      <div id="panel-admin-products" class="space-y-6" hidden>
+        <div class="bg-white rounded-3xl border border-[#dbe5d8] p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <h2 class="text-xl font-bold text-[#173626] flex items-center gap-2">
+              <i data-lucide="package" class="w-5 h-5 text-[#174d37]"></i> Danh Sách Sản Phẩm Trong Kho
+            </h2>
+            <button id="btn-reset-db" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5 text-red-700 hover:bg-red-50">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Dọn dẹp kho
+            </button>
+          </div>
+          <div class="db-table-wrapper rounded-2xl overflow-hidden border">
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th class="w-12 text-center">STT</th>
+                  <th class="w-16">Ảnh</th>
+                  <th>Tên sản phẩm & Danh mục</th>
+                  <th class="whitespace-nowrap">Giá bán</th>
+                  <th class="text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="manage-products-list">
+                <tr><td colspan="5" class="text-center py-6 text-gray-500">Đang tải sản phẩm...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-[#173626] text-white px-5 py-3 rounded-xl shadow-2xl max-w-[90%] text-sm font-semibold border border-green-700/40" hidden></div>
+
+  <!-- FOOTER -->
+  <footer class="w-full py-4 text-center text-xs text-gray-400 border-t border-gray-100 bg-white">
+    © 2026 YÊN BÌNH MARKET. Nông sản sạch & Đặc sản vùng miền.
+  </footer>
+
+  <!-- Supabase CDN & Main Orders Logic -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script>
+    (() => {
+      const SUPABASE_URL = "https://sjvwoyehcfcseobenxmi.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_pX92oWJ-vlC3PfklnXk9BQ_uP0OH3kC";
+      const supabaseClient = (window.supabase && typeof window.supabase.createClient === "function")
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      const $ = (id) => document.getElementById(id);
+      const money = (val) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
+
+      function toast(msg) {
+        const el = $("toast");
+        if (!el) return;
+        el.textContent = msg;
+        el.hidden = false;
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => (el.hidden = true), 3500);
+      }
+
+      // 1. Kiểm tra tài khoản đăng nhập
+      const currentUser = JSON.parse(localStorage.getItem("yb_user") || "null");
+      if (!currentUser) {
+        window.location.href = "login.html?redirect=orders";
+        return;
+      }
+
+      // 2. Hiển thị thông tin người dùng trên Header
+      const userNameEl = $("header-user-name");
+      if (userNameEl) {
+        userNameEl.textContent = currentUser.fullName || currentUser.email || "Tài khoản";
+      }
+
+      $("btn-logout").onclick = () => {
+        localStorage.removeItem("yb_user");
+        toast("Đã đăng xuất tài khoản.");
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 500);
+      };
+
+      // Icon Lucide
+      if (window.lucide) lucide.createIcons();
+
+      // Phân quyền: Admin vs Customer
+      const isAdmin = currentUser.role === "admin";
+      if (isAdmin) {
+        $("admin-section").hidden = false;
+        $("customer-section").hidden = true;
+        initAdminPortal();
+      } else {
+        $("customer-section").hidden = false;
+        $("admin-section").hidden = true;
+        initCustomerPortal();
+      }
+
+      /* ========================================================
+         PHẦN 1: QUẢN TRỊ ĐƠN HÀNG DÀNH CHO KHÁCH HÀNG (CUSTOMER)
+         ======================================================== */
+      function initCustomerPortal() {
+        if ($("cust-phone-badge")) {
+          $("cust-phone-badge").textContent = `SĐT: ${currentUser.phone || "Chưa có SĐT"}`;
+        }
+        loadCustomerOrders();
+        $("btn-refresh-cust-orders").onclick = loadCustomerOrders;
+      }
+
+      async function loadCustomerOrders() {
+        const container = $("cust-orders-list");
+        container.innerHTML = `
+          <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 text-gray-500 shadow-sm flex flex-col items-center justify-center gap-2">
+            <div class="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm">Đang tải danh sách đơn hàng và trạng thái giao hàng mới nhất...</p>
+          </div>
+        `;
+
+        let orders = [];
+        const userId = currentUser.id;
+        const phone = currentUser.phone ? currentUser.phone.trim() : "";
+        const name = currentUser.fullName ? currentUser.fullName.trim().toLowerCase() : "";
+
+        // Tra cứu Supabase
+        if (supabaseClient) {
+          try {
+            const { data, error } = await supabaseClient
+              .from("orders")
+              .select("*")
+              .order("createdAt", { ascending: false });
+
+            if (!error && Array.isArray(data)) {
+              orders = data.filter((o) => {
+                if (o.userId && o.userId === userId) return true;
+                if (phone && o.customerPhone && o.customerPhone.trim() === phone) return true;
+                if (name && o.customerName && o.customerName.trim().toLowerCase() === name) return true;
+                return false;
+              });
+            }
+          } catch (err) {
+            console.warn("Lỗi khi tải đơn hàng từ Supabase:", err);
+          }
+        }
+
+        // Kết hợp lưu trữ thiết bị
+        const localOrders = JSON.parse(localStorage.getItem(`yb_user_orders_${userId}`) || "[]");
+        localOrders.forEach((lo) => {
+          if (!orders.some((o) => o.orderCode === lo.orderCode)) {
+            orders.push(lo);
+          }
+        });
+        orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        renderCustomerOrders(orders);
+      }
+
+      function getStatusBadge(status) {
+        switch (status) {
+          case "Chờ xác nhận":
+            return `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Chờ xác nhận (Shop đang liên hệ)
+              </span>
+            `;
+          case "Đang giao":
+            return `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-300">
+                <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-600"></i> Đang giao hàng (Đang trên đường tới bạn)
+              </span>
+            `;
+          case "Đã giao":
+          case "Hoàn thành":
+            return `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Đã giao thành công
+              </span>
+            `;
+          case "Đã hủy":
+            return `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-800 border border-red-300">
+                <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-600"></i> Đã hủy đơn
+              </span>
+            `;
+          default:
+            return `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-700 border border-gray-300">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i> ${status || "Đang xử lý"}
+              </span>
+            `;
+        }
+      }
+
+      function getDeliveryTimeline(status) {
+        if (status === "Đã hủy") {
+          return `
+            <div class="p-3 bg-red-50 rounded-xl border border-red-100 text-xs text-red-700 flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+              <span>Đơn hàng này đã bị hủy. Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ hotline: <strong>0988 123 456</strong>.</span>
+            </div>
+          `;
+        }
+
+        const isStep1Done = true;
+        const isStep2Done = status === "Đang giao" || status === "Đã giao" || status === "Hoàn thành";
+        const isStep3Done = status === "Đã giao" || status === "Hoàn thành";
+
+        return `
+          <div class="py-3 px-4 bg-gray-50/80 rounded-2xl border border-gray-200/80">
+            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tiến trình vận chuyển đơn hàng:</p>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+              <div class="flex flex-col items-center">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep1Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"} mb-1 shadow-sm">
+                  ✓
+                </div>
+                <span class="font-bold text-[#173626]">Đã nhận đơn</span>
+                <small class="text-[10px] text-gray-400">Shop tiếp nhận</small>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep2Done ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
+                  ${isStep2Done ? "✓" : "2"}
+                </div>
+                <span class="font-bold ${isStep2Done ? "text-blue-900" : "text-gray-400"}">Đang giao hàng</span>
+                <small class="text-[10px] text-gray-400">Đang trên đường tới bạn</small>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isStep3Done ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-400"} mb-1 shadow-sm">
+                  ${isStep3Done ? "✓" : "3"}
+                </div>
+                <span class="font-bold ${isStep3Done ? "text-emerald-900" : "text-gray-400"}">Đã giao hàng</span>
+                <small class="text-[10px] text-gray-400">Giao thành công</small>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderCustomerOrders(orders) {
+        const container = $("cust-orders-list");
+        if (!container) return;
+
+        if (!orders || orders.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-16 bg-white rounded-3xl border border-[#dbe5d8] p-8 shadow-sm">
+              <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-[#174d37] flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                <i data-lucide="package-open" class="w-8 h-8"></i>
+              </div>
+              <h3 class="text-lg font-bold text-[#173626]">Bạn chưa có đơn hàng nào</h3>
+              <p class="text-xs text-gray-500 mt-1 mb-6">Hãy dạo xem gian hàng đặc sản Tây Bắc và chọn món bạn yêu thích nhé!</p>
+              <a href="index.html#products" class="primary px-6 py-3 text-sm font-bold inline-flex items-center gap-2 shadow-sm">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i> Khám phá sản phẩm ngay
+              </a>
+            </div>
+          `;
+          if (window.lucide) lucide.createIcons();
+          return;
+        }
+
+        container.innerHTML = orders.map((order) => {
+          const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+          }) : "Vừa xong";
+
+          const items = Array.isArray(order.items) ? order.items : [];
+          const itemsHtml = items.map((item) => `
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 text-xs">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-lg bg-emerald-50 text-[#174d37] font-bold flex items-center justify-center shrink-0 border border-emerald-100">
+                  ${item.qty || 1}x
+                </span>
+                <div>
+                  <strong class="text-gray-800 text-sm block">${item.name || "Sản phẩm"}</strong>
+                  <small class="text-gray-400">Đơn giá: ${money(item.price || 0)}</small>
+                </div>
+              </div>
+              <span class="font-bold text-gray-800 text-sm">${money((item.price || 0) * (item.qty || 1))}</span>
+            </div>
+          `).join("");
+
+          return `
+            <article class="bg-white rounded-3xl border border-[#dbe5d8] p-6 md:p-7 shadow-sm space-y-4 animate-rise hover:shadow-md transition">
+              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-base text-[#174d37]">${order.orderCode}</span>
+                    <span class="text-xs text-gray-400">· Đặt lúc: ${dateStr}</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Người nhận: <strong>${order.customerName}</strong> · SĐT: <strong>${order.customerPhone}</strong>
+                  </p>
+                </div>
+                <div>
+                  ${getStatusBadge(order.status)}
+                </div>
+              </div>
+
+              <!-- TIẾN TRÌNH VẬN CHUYỂN -->
+              ${getDeliveryTimeline(order.status)}
+
+              <!-- CHI TIẾT MÓN HÀNG -->
+              <div class="bg-gray-50/70 p-4 rounded-2xl border border-gray-100">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Chi tiết sản phẩm đã mua:</p>
+                <div class="space-y-1">
+                  ${itemsHtml || '<p class="text-xs text-gray-400">Không có thông tin chi tiết món</p>'}
+                </div>
+              </div>
+
+              <!-- ĐỊA CHỈ & TỔNG TIỀN -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
+                <div class="text-gray-600 max-w-md">
+                  <p class="flex items-start gap-1.5">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-[#174d37] shrink-0 mt-0.5"></i>
+                    <span><strong>Địa chỉ giao:</strong> ${order.customerAddress}</span>
+                  </p>
+                  ${order.customerNote ? `<p class="text-gray-400 italic mt-1 ml-5">Ghi chú: ${order.customerNote}</p>` : ""}
+                </div>
+                <div class="text-right">
+                  <span class="text-xs text-gray-400 block">Tổng tiền thanh toán khi nhận hàng:</span>
+                  <strong class="text-xl font-bold text-[#173626]">${money(order.totalAmount || 0)}</strong>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      /* ========================================================
+         PHẦN 2: QUẢN TRỊ DÀNH CHO ADMIN
+         ======================================================== */
+      let allAdminOrders = [];
+      let currentFilterStatus = "all";
+      let manualOrderDraftItems = [];
+      let allProducts = [];
+
+      function initAdminPortal() {
+        if ($("admin-greeting")) {
+          $("admin-greeting").textContent = `(Xin chào Quản Trị Viên: ${currentUser.fullName})`;
+        }
+
+        // Tabs
+        const tabs = ["orders", "new-order", "products"];
+        tabs.forEach((tab) => {
+          $(`tab-btn-${tab}`).onclick = () => switchAdminTab(tab);
+        });
+
+        // Nút lọc trạng thái đơn
+        document.querySelectorAll(".order-filter-btn").forEach((btn) => {
+          btn.onclick = () => {
+            document.querySelectorAll(".order-filter-btn").forEach((b) => {
+              b.className = "order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-white text-gray-700 hover:bg-gray-50";
+            });
+            btn.className = "order-filter-btn text-xs px-3 py-1.5 rounded-lg border font-semibold bg-[#174d37] text-white";
+            currentFilterStatus = btn.dataset.status;
+            filterAndRenderAdminOrders();
+          };
+        });
+
+        $("btn-refresh-admin-orders").onclick = loadAllAdminOrders;
+        $("btn-add-item-to-manual-order").onclick = addItemToManualOrder;
+        $("admin-create-order-form").onsubmit = submitManualOrder;
+        $("btn-reset-db").onclick = resetProductsDatabase;
+
+        loadAllAdminOrders();
+        loadProductsForAdmin();
+      }
+
+      function switchAdminTab(tabName) {
+        const tabs = ["orders", "new-order", "products"];
+        tabs.forEach((t) => {
+          const btn = $(`tab-btn-${t}`);
+          const panel = $(`panel-admin-${t}`);
+          const isActive = t === tabName;
+          if (btn) {
+            btn.className = isActive
+              ? "admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-[#174d37] text-white shadow-sm"
+              : "admin-tab-btn flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-gray-700 hover:bg-white/60";
+          }
+          if (panel) panel.hidden = !isActive;
+        });
+        if (window.lucide) lucide.createIcons();
+      }
+
+      async function loadAllAdminOrders() {
+        if (!supabaseClient) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from("orders")
+            .select("*")
+            .order("createdAt", { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            allAdminOrders = data;
+            $("badge-total-orders").textContent = allAdminOrders.length;
+            filterAndRenderAdminOrders();
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải đơn hàng Admin:", err);
+          toast("Không thể tải danh sách đơn hàng.");
+        }
+      }
+
+      function filterAndRenderAdminOrders() {
+        let list = allAdminOrders;
+        if (currentFilterStatus !== "all") {
+          list = allAdminOrders.filter((o) => o.status === currentFilterStatus);
+        }
+        renderAdminOrdersTable(list);
+      }
+
+      function renderAdminOrdersTable(orders) {
+        const tbody = $("admin-orders-list");
+        if (!tbody) return;
+
+        if (!orders || orders.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">Không có đơn hàng nào phù hợp.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = orders.map((o) => {
+          const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit"
+          }) : "";
+
+          const itemsText = Array.isArray(o.items)
+            ? o.items.map((x) => `<span class="block">• ${x.name} × ${x.qty}</span>`).join("")
+            : "Chi tiết món";
+
+          return `
+            <tr class="hover:bg-gray-50/60 transition text-xs">
+              <td class="font-mono font-bold text-[#174d37]">
+                ${o.orderCode}<br>
+                <small class="text-gray-400 font-normal">${dateStr}</small>
+              </td>
+              <td>
+                <strong class="text-gray-800 text-sm block">${o.customerName}</strong>
+                <a href="tel:${o.customerPhone}" class="text-[#174d37] font-semibold hover:underline">${o.customerPhone}</a>
+              </td>
+              <td class="max-w-xs text-gray-600">
+                ${o.customerAddress}
+                ${o.customerNote ? `<br><small class="text-gray-400 italic">Ghi chú: ${o.customerNote}</small>` : ""}
+              </td>
+              <td class="text-gray-700">${itemsText}</td>
+              <td class="font-bold text-[#173626] whitespace-nowrap text-sm">${money(o.totalAmount || 0)}</td>
+              <td>
+                <select class="field text-xs py-1 px-2 font-bold cursor-pointer" onchange="window.updateOrderStatus(${o.id}, this.value)">
+                  <option value="Chờ xác nhận" ${o.status === "Chờ xác nhận" ? "selected" : ""}>Chờ xác nhận</option>
+                  <option value="Đang giao" ${o.status === "Đang giao" ? "selected" : ""}>Đang giao</option>
+                  <option value="Hoàn thành" ${o.status === "Hoàn thành" || o.status === "Đã giao" ? "selected" : ""}>Đã giao</option>
+                  <option value="Đã hủy" ${o.status === "Đã hủy" ? "selected" : ""}>Đã hủy</option>
+                </select>
+              </td>
+              <td class="text-right">
+                <button type="button" class="text-red-600 hover:text-red-800 p-1.5" onclick="window.deleteOrderById(${o.id})" title="Xóa đơn">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      window.updateOrderStatus = async (orderId, newStatus) => {
+        if (!supabaseClient) return;
+        try {
+          const { error } = await supabaseClient
+            .from("orders")
+            .update({ status: newStatus })
+            .eq("id", orderId);
+
+          if (error) throw error;
+          toast(`Đã cập nhật trạng thái đơn thành: ${newStatus}`);
+          const target = allAdminOrders.find((o) => o.id === orderId);
+          if (target) target.status = newStatus;
+          filterAndRenderAdminOrders();
+        } catch (err) {
+          console.error(err);
+          toast("Không thể cập nhật trạng thái đơn hàng.");
+        }
+      };
+
+      window.deleteOrderById = async (orderId) => {
+        if (!confirm("Bạn có chắc chắn muốn xóa đơn hàng này khỏi cơ sở dữ liệu?")) return;
+        if (!supabaseClient) return;
+        try {
+          const { error } = await supabaseClient
+            .from("orders")
+            .delete()
+            .eq("id", orderId);
+
+          if (error) throw error;
+          toast("Đã xóa đơn hàng thành công!");
+          allAdminOrders = allAdminOrders.filter((o) => o.id !== orderId);
+          $("badge-total-orders").textContent = allAdminOrders.length;
+          filterAndRenderAdminOrders();
+        } catch (err) {
+          console.error(err);
+          toast("Lỗi khi xóa đơn hàng.");
+        }
+      };
+
+      // Tải sản phẩm cho dropdown thủ công và quản lý kho
+      async function loadProductsForAdmin() {
+        if (!supabaseClient) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from("products")
+            .select("*")
+            .order("createdAt", { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            allProducts = data;
+            $("badge-total-products").textContent = allProducts.length;
+
+            // Nạp select box
+            const sel = $("manual-order-product");
+            sel.innerHTML = '<option value="">-- Chọn sản phẩm có trong kho --</option>';
+            allProducts.forEach((p) => {
+              const opt = document.createElement("option");
+              opt.value = p.id;
+              opt.textContent = `${p.name} - ${money(p.price)}`;
+              sel.appendChild(opt);
+            });
+
+            // Nạp bảng sản phẩm
+            renderManageProductsList(allProducts);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      function renderManageProductsList(products) {
+        const tbody = $("manage-products-list");
+        if (!tbody) return;
+        if (!products.length) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">Kho đang trống.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = products.map((p, idx) => `
+          <tr class="hover:bg-gray-50 text-xs">
+            <td class="text-center font-bold text-gray-400">${idx + 1}</td>
+            <td>
+              <img src="${p.image || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=100&q=80'}" alt="${p.name}" class="table-thumb">
+            </td>
+            <td>
+              <strong class="text-gray-800 text-sm block">${p.name}</strong>
+              <small class="text-gray-400">${p.category || 'Đặc sản'}</small>
+            </td>
+            <td class="font-bold text-[#173626] text-sm">${money(p.price)}</td>
+            <td class="text-right">
+              <button type="button" class="text-red-600 hover:text-red-800 p-1.5" onclick="window.deleteProductById('${p.id}')" title="Xóa món">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `).join("");
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      window.deleteProductById = async (id) => {
+        if (!confirm("Bạn có chắc muốn xóa sản phẩm này khỏi kho?")) return;
+        if (!supabaseClient) return;
+        try {
+          const { error } = await supabaseClient.from("products").delete().eq("id", id);
+          if (error) throw error;
+          toast("Đã xóa sản phẩm khỏi kho!");
+          loadProductsForAdmin();
+        } catch (err) {
+          console.error(err);
+          toast("Lỗi khi xóa sản phẩm.");
+        }
+      };
+
+      async function resetProductsDatabase() {
+        if (!confirm("Bạn có chắc chắn muốn xóa sạch toàn bộ sản phẩm trong kho?")) return;
+        if (!supabaseClient) return;
+        try {
+          const { error } = await supabaseClient.from("products").delete().neq("id", "___dummy___");
+          if (error) throw error;
+          toast("Đã dọn dẹp sạch toàn bộ kho sản phẩm!");
+          loadProductsForAdmin();
+        } catch (err) {
+          console.error(err);
+          toast("Lỗi khi dọn dẹp kho.");
+        }
+      }
+
+      // Thêm món vào đơn thủ công
+      function addItemToManualOrder() {
+        const sel = $("manual-order-product");
+        const qty = parseInt($("manual-order-qty").value, 10) || 1;
+        const prodId = sel.value;
+        if (!prodId) {
+          toast("Vui lòng chọn 1 sản phẩm từ kho!");
+          return;
+        }
+        const product = allProducts.find((p) => p.id === prodId);
+        if (!product) return;
+
+        const existing = manualOrderDraftItems.find((x) => x.product.id === prodId);
+        if (existing) {
+          existing.qty += qty;
+        } else {
+          manualOrderDraftItems.push({ product, qty });
+        }
+        renderManualOrderDraft();
+      }
+
+      function renderManualOrderDraft() {
+        const box = $("manual-order-items-list");
+        if (!manualOrderDraftItems.length) {
+          box.innerHTML = '<p class="text-xs text-gray-400 italic">Chưa chọn sản phẩm nào.</p>';
+          $("manual-order-total").textContent = "0 ₫";
+          return;
+        }
+
+        let total = 0;
+        box.innerHTML = manualOrderDraftItems.map((item, idx) => {
+          const sub = item.product.price * item.qty;
+          total += sub;
+          return `
+            <div class="flex items-center justify-between py-1 border-b border-gray-100 last:border-0 text-xs">
+              <span><strong>${item.product.name}</strong> × ${item.qty}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[#174d37]">${money(sub)}</span>
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="window.removeManualItem(${idx})">×</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        $("manual-order-total").textContent = money(total);
+      }
+
+      window.removeManualItem = (idx) => {
+        manualOrderDraftItems.splice(idx, 1);
+        renderManualOrderDraft();
+      };
+
+      async function submitManualOrder(e) {
+        e.preventDefault();
+        if (!manualOrderDraftItems.length) {
+          toast("Vui lòng chọn ít nhất 1 sản phẩm vào đơn!");
+          return;
+        }
+
+        const name = $("manual-customer-name").value.trim();
+        const phone = $("manual-customer-phone").value.trim();
+        const address = $("manual-customer-address").value.trim();
+        const status = $("manual-order-status").value;
+        const note = $("manual-customer-note").value.trim();
+
+        if (!name || !phone || !address) {
+          toast("Vui lòng điền đủ Tên, SĐT và Địa chỉ khách!");
+          return;
+        }
+
+        const total = manualOrderDraftItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+        const orderCode = "YB-ADM-" + Date.now().toString(36).toUpperCase();
+        const orderData = {
+          orderCode,
+          customerName: name,
+          customerPhone: phone,
+          customerAddress: address,
+          customerNote: note,
+          paymentMethod: "COD",
+          items: manualOrderDraftItems.map((x) => ({ id: x.product.id, name: x.product.name, price: x.product.price, qty: x.qty })),
+          totalAmount: total,
+          status,
+          createdAt: new Date().toISOString()
+        };
+
+        if (!supabaseClient) return;
+        try {
+          const { error } = await supabaseClient.from("orders").insert([orderData]);
+          if (error) throw error;
+          toast("Tạo đơn hàng thủ công thành công!");
+          $("admin-create-order-form").reset();
+          manualOrderDraftItems = [];
+          renderManualOrderDraft();
+          switchAdminTab("orders");
+          loadAllAdminOrders();
+        } catch (err) {
+          console.error(err);
+          toast("Lỗi khi lưu đơn hàng lên Database.");
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
