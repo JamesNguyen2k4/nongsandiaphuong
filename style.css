@@ -220,6 +220,34 @@ button:disabled {
   border-color: var(--green);
 }
 
+#catalog-section {
+  scroll-margin-top: 170px;
+}
+
+@media (max-width: 1024px) {
+  #catalog-section {
+    scroll-margin-top: 220px;
+  }
+}
+
+#category-bar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd8c9 transparent;
+}
+
+#category-bar::-webkit-scrollbar {
+  height: 5px;
+}
+
+#category-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#category-bar::-webkit-scrollbar-thumb {
+  background: #cbd8c9;
+  border-radius: 999px;
+}
+
 .qty {
   display: flex;
   align-items: center;

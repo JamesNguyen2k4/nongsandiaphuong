@@ -395,26 +395,60 @@ function toast(message) {
   toast.timer = setTimeout(() => (el.hidden = true), 3500);
 }
 
-// Cuộn mượt đến khu vực danh mục sản phẩm, tính toán trừ đi chiều cao header sticky
-function scrollToProductsCatalog() {
-  const target = $("catalog-section") || $("category-bar") || $("product-grid");
-  if (!target) return;
-  const header = document.querySelector("header");
-  const headerHeight = header ? header.offsetHeight : 120;
-  const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
-  const finalScrollTop = Math.max(0, targetTop - headerHeight - 16);
+// Cuộn mượt đến khu vực danh mục sản phẩm, tính toán trừ đi chiều cao header sticky và lề đệm
+function scrollToProductsCatalog(immediate = false) {
+  const homeView = $("home-view");
+  const isAlreadyHome = homeView && !homeView.hidden;
 
-  window.scrollTo({
-    top: finalScrollTop,
-    behavior: "smooth"
+  if (!isAlreadyHome) {
+    showView("home", false);
+  }
+
+  // Cập nhật trạng thái active trên navbar
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    link.classList.toggle("active", link.dataset.go === "products");
   });
+
+  const target = $("catalog-section");
+  if (!target) return;
+
+  const performScroll = () => {
+    const header = document.querySelector("header");
+    // Chiều cao thực tế chính xác bao gồm thanh banner thông báo và menu
+    const headerHeight = header ? header.getBoundingClientRect().height : 155;
+    
+    // Tọa độ tuyệt đối của mục catalog tính từ đỉnh trang
+    const rect = target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const targetTop = rect.top + scrollTop;
+    
+    // Trừ thêm 24px lề đệm để tiêu đề "DANH MỤC SẢN PHẨM" không bao giờ bị che khuất bởi header nổi (sticky header)
+    const finalScrollTop = Math.max(0, targetTop - headerHeight - 24);
+
+    window.scrollTo({
+      top: finalScrollTop,
+      behavior: immediate ? "auto" : "smooth"
+    });
+  };
+
+  if (immediate) {
+    performScroll();
+  } else {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(performScroll);
+    });
+  }
 }
 
 // Điều hướng màn hình (View Router)
 function showView(name, shouldScrollTop = true) {
   document.querySelectorAll("main > .view, main > section.view").forEach((el) => {
-    el.hidden = el.id !== name + "-view";
+    const isTarget = el.id === name + "-view";
+    if (el.hidden === isTarget) {
+      el.hidden = !isTarget;
+    }
   });
+
   if (shouldScrollTop) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -827,8 +861,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     btn.addEventListener("click", () => {
       const target = btn.dataset.go;
       if (target === "products") {
-        showView("home", false);
-        setTimeout(scrollToProductsCatalog, 60);
+        scrollToProductsCatalog();
       } else {
         showView(target);
       }
@@ -840,6 +873,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     btn.onclick = () => {
       selectedCategory = btn.dataset.category;
       filterProducts();
+
+      // Khi chọn danh mục, căn chỉnh góc nhìn sao cho tiêu đề danh mục luôn rõ nét, không bị che bởi header nổi
+      const target = $("catalog-section");
+      if (target) {
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.getBoundingClientRect().height : 155;
+        const rect = target.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const idealScroll = Math.max(0, rect.top + scrollTop - headerHeight - 24);
+
+        // Chỉ cuộn nếu người dùng đang ở quá xa (ví dụ đang ở trên hero hoặc cuộn quá sâu dưới sản phẩm)
+        if (Math.abs(scrollTop - idealScroll) > 90) {
+          window.scrollTo({
+            top: idealScroll,
+            behavior: "smooth"
+          });
+        }
+      }
     };
   });
 
@@ -848,9 +899,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     searchTerm = $("search").value.trim().toLowerCase();
     selectedCategory = "all";
-    showView("home", false);
     filterProducts();
-    setTimeout(scrollToProductsCatalog, 60);
+    scrollToProductsCatalog();
   });
 
   $("search").addEventListener("input", () => {
