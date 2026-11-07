@@ -144,8 +144,8 @@
                 <th>Địa chỉ nhận</th>
                 <th>Sản phẩm đặt</th>
                 <th class="whitespace-nowrap">Tổng tiền</th>
-                <th class="whitespace-nowrap">Trạng thái giao</th>
-                <th class="text-right">Thao tác</th>
+                <th class="whitespace-nowrap min-w-[220px]">Trạng thái & Thao tác giao hàng</th>
+                <th class="text-right w-16">Xóa</th>
               </tr>
             </thead>
             <tbody id="admin-orders-list">
@@ -207,13 +207,13 @@
             <input id="manual-customer-address" class="field text-sm" required placeholder="Số nhà, đường, thôn/xã, tỉnh/thành phố">
           </div>
           <div>
-            <label for="manual-order-status" class="label">Trạng thái đơn hàng</label>
-            <select id="manual-order-status" class="field text-sm">
-              <option value="Chờ xác nhận" selected>Chờ xác nhận</option>
-              <option value="Đang giao">Đang giao</option>
-              <option value="Hoàn thành">Đã giao</option>
-              <option value="Đã hủy">Đã hủy</option>
-            </select>
+            <label class="label mb-1.5 block">Trạng thái đơn ban đầu</label>
+            <input type="hidden" id="manual-order-status" value="Chờ xác nhận">
+            <div id="manual-status-selector" class="flex flex-wrap gap-1.5 pt-1">
+              <button type="button" data-val="Chờ xác nhận" class="manual-status-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-[#174d37] text-white shadow-sm">Chờ xác nhận</button>
+              <button type="button" data-val="Đang giao" class="manual-status-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">Đang giao</button>
+              <button type="button" data-val="Hoàn thành" class="manual-status-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">Đã giao</button>
+            </div>
           </div>
           <div>
             <label for="manual-customer-note" class="label">Ghi chú đơn hàng</label>
@@ -597,6 +597,21 @@
         $("admin-create-order-form").onsubmit = submitManualOrder;
         $("btn-reset-db").onclick = resetProductsDatabase;
 
+        // Chọn nhanh trạng thái đơn thủ công
+        document.querySelectorAll(".manual-status-btn").forEach((btn) => {
+          btn.onclick = () => {
+            const val = btn.dataset.val;
+            $("manual-order-status").value = val;
+            document.querySelectorAll(".manual-status-btn").forEach((b) => {
+              if (b.dataset.val === val) {
+                b.className = "manual-status-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-[#174d37] text-white shadow-sm";
+              } else {
+                b.className = "manual-status-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200";
+              }
+            });
+          };
+        });
+
         loadAllAdminOrders();
         loadProductsForAdmin();
       }
@@ -644,6 +659,105 @@
         renderAdminOrdersTable(list);
       }
 
+      function renderShopeeStatusActions(o) {
+        const s = o.status || "Chờ xác nhận";
+        const id = o.id;
+
+        let badge = "";
+        let quickAction = "";
+
+        if (s === "Chờ xác nhận") {
+          badge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Chờ xác nhận
+            </span>
+          `;
+          quickAction = `
+            <div class="flex items-center gap-1.5 mt-2">
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Đang giao')" class="px-3 py-1.5 text-xs font-bold rounded-xl bg-[#ee4d2d] hover:bg-[#d73211] text-white flex items-center gap-1.5 shadow-sm transition transform hover:scale-[1.02] active:scale-[0.98]">
+                <i data-lucide="truck" class="w-3.5 h-3.5"></i> Chuẩn bị & Giao hàng
+              </button>
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Đã hủy')" class="px-2 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 bg-white hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition" title="Hủy đơn hàng">
+                Hủy
+              </button>
+            </div>
+          `;
+        } else if (s === "Đang giao") {
+          badge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-300">
+              <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-600"></i> Đang giao hàng
+            </span>
+          `;
+          quickAction = `
+            <div class="flex items-center gap-1.5 mt-2">
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Hoàn thành')" class="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1.5 shadow-sm transition transform hover:scale-[1.02] active:scale-[0.98]">
+                <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Đã giao thành công
+              </button>
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Chờ xác nhận')" class="px-2 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 bg-white hover:bg-amber-50 text-gray-500 hover:text-amber-700 transition" title="Quay lại Chờ xác nhận">
+                Hoãn
+              </button>
+            </div>
+          `;
+        } else if (s === "Hoàn thành" || s === "Đã giao") {
+          badge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+              <i data-lucide="badge-check" class="w-3.5 h-3.5 text-emerald-600"></i> Giao thành công
+            </span>
+          `;
+          quickAction = `
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-[11px] text-gray-400 font-medium">Đơn đã hoàn tất</span>
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Đang giao')" class="text-[11px] font-semibold text-blue-600 hover:underline">
+                Giao lại
+              </button>
+            </div>
+          `;
+        } else if (s === "Đã hủy") {
+          badge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-300">
+              <i data-lucide="x-circle" class="w-3.5 h-3.5 text-rose-600"></i> Đã hủy đơn
+            </span>
+          `;
+          quickAction = `
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-[11px] text-gray-400 font-medium">Đơn đã đóng</span>
+              <button type="button" onclick="window.updateOrderStatus(${id}, 'Chờ xác nhận')" class="text-[11px] font-semibold text-amber-600 hover:underline">
+                Khôi phục
+              </button>
+            </div>
+          `;
+        }
+
+        const steps = [
+          { label: "Chờ duyệt", val: "Chờ xác nhận", active: s === "Chờ xác nhận", activeClass: "bg-amber-500 text-white font-bold shadow-sm" },
+          { label: "Đang giao", val: "Đang giao", active: s === "Đang giao", activeClass: "bg-blue-600 text-white font-bold shadow-sm" },
+          { label: "Đã giao", val: "Hoàn thành", active: s === "Hoàn thành" || s === "Đã giao", activeClass: "bg-emerald-600 text-white font-bold shadow-sm" },
+          { label: "Hủy", val: "Đã hủy", active: s === "Đã hủy", activeClass: "bg-rose-600 text-white font-bold shadow-sm" }
+        ];
+
+        const stepButtons = steps.map((st) => {
+          if (st.active) {
+            return `<span class="px-2 py-0.5 text-[11px] rounded-lg ${st.activeClass} cursor-default select-none">${st.label}</span>`;
+          }
+          return `
+            <button type="button" onclick="window.updateOrderStatus(${id}, '${st.val}')" class="px-2 py-0.5 text-[11px] rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition">
+              ${st.label}
+            </button>
+          `;
+        }).join("");
+
+        return `
+          <div class="space-y-1 py-1 min-w-[215px]">
+            <div>${badge}</div>
+            ${quickAction}
+            <div class="flex flex-wrap items-center gap-1 pt-1.5 mt-1 border-t border-gray-100">
+              <span class="text-[10px] text-gray-400 block w-full">Chuyển trực tiếp:</span>
+              ${stepButtons}
+            </div>
+          </div>
+        `;
+      }
+
       function renderAdminOrdersTable(orders) {
         const tbody = $("admin-orders-list");
         if (!tbody) return;
@@ -682,12 +796,7 @@
               <td class="text-gray-700">${itemsText}</td>
               <td class="font-bold text-[#173626] whitespace-nowrap text-sm">${money(o.totalAmount || 0)}</td>
               <td>
-                <select class="field text-xs py-1 px-2 font-bold cursor-pointer" onchange="window.updateOrderStatus(${o.id}, this.value)">
-                  <option value="Chờ xác nhận" ${o.status === "Chờ xác nhận" ? "selected" : ""}>Chờ xác nhận</option>
-                  <option value="Đang giao" ${o.status === "Đang giao" ? "selected" : ""}>Đang giao</option>
-                  <option value="Hoàn thành" ${o.status === "Hoàn thành" || o.status === "Đã giao" ? "selected" : ""}>Đã giao</option>
-                  <option value="Đã hủy" ${o.status === "Đã hủy" ? "selected" : ""}>Đã hủy</option>
-                </select>
+                ${renderShopeeStatusActions(o)}
               </td>
               <td class="text-right">
                 <button type="button" class="text-red-600 hover:text-red-800 p-1.5" onclick="window.deleteOrderById(${o.id})" title="Xóa đơn">
