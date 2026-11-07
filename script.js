@@ -1113,10 +1113,6 @@ function initAuthUI() {
   const adminLogoutBtn = $("admin-logout-btn");
   if (adminLogoutBtn) adminLogoutBtn.onclick = logout;
 
-  // Đăng nhập Admin tại cổng vào
-  const adminLoginForm = $("admin-login-form");
-  if (adminLoginForm) adminLoginForm.addEventListener("submit", handleAdminLogin);
-
   // Tab switcher admin
   if ($("tab-btn-orders")) $("tab-btn-orders").onclick = () => switchAdminTab("orders");
   if ($("tab-btn-new-order")) $("tab-btn-new-order").onclick = () => switchAdminTab("new-order");
@@ -1230,29 +1226,6 @@ function updateAuthUI() {
     if (adminNav) adminNav.hidden = true;
   }
   if (window.lucide) lucide.createIcons();
-}
-
-async function handleAdminLogin(e) {
-  e.preventDefault();
-  const email = $("admin-email").value.trim();
-  const password = $("admin-password").value;
-
-  try {
-    const user = await db.loginUser(email, password);
-    if (user.role !== "admin") {
-      toast("Tài khoản này không có quyền Quản trị viên (Admin)!");
-      return;
-    }
-    currentUser = user;
-    localStorage.setItem("yb_user", JSON.stringify(user));
-    loadCartForCurrentUser(false);
-    toast("Đăng nhập Admin thành công!");
-    updateAuthUI();
-    setupAdminPortal();
-  } catch (err) {
-    console.error(err);
-    toast(err.message || "Tài khoản hoặc mật khẩu quản trị không đúng.");
-  }
 }
 
 function logout() {

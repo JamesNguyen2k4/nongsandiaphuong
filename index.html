@@ -375,23 +375,15 @@
         <h1 class="text-2xl font-bold text-[#173626] mb-2">Khu Vực Quản Trị Viên</h1>
         <p class="text-sm text-gray-500 mb-6">Trang này dành riêng cho quản trị viên để quản lý đơn hàng và sản phẩm. Vui lòng đăng nhập để tiếp tục.</p>
 
-        <form id="admin-login-form" class="space-y-4 text-left" novalidate>
-          <div>
-            <label for="admin-email" class="label">Tên đăng nhập hoặc Email Quản trị viên</label>
-            <input id="admin-email" type="text" class="field" required placeholder="admin hoặc admin@yenbinhmarket.vn" autocomplete="username">
-          </div>
-          <div>
-            <label for="admin-password" class="label">Mật khẩu</label>
-            <input id="admin-password" type="password" class="field" required placeholder="••••••••" autocomplete="current-password">
-          </div>
-          <button type="submit" class="primary w-full py-3 text-sm flex items-center justify-center gap-2">
-            <i data-lucide="log-in" class="w-4 h-4"></i> Đăng nhập Quản Trị
-          </button>
-        </form>
-        <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 text-left">
+        <a href="login.html?redirect=manage" class="primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Đến Trang Đăng Nhập Quản Trị</span>
+        </a>
+
+        <div class="mt-5 p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 text-left">
           <strong>Tài khoản Admin mặc định:</strong><br>
-          • Đăng nhập: <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin</code> (hoặc <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin@yenbinhmarket.vn</code>)<br>
-          • Mật khẩu: <code class="bg-amber-100 px-1 py-0.5 rounded font-bold">admin123</code>
+          • Đăng nhập: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin</code> (hoặc <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin@yenbinhmarket.vn</code>)<br>
+          • Mật khẩu: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin123</code>
         </div>
       </div>
 
