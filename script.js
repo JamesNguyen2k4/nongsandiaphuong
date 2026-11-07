@@ -416,6 +416,10 @@ function showView(name, shouldScrollTop = true) {
   } else if (name === "checkout") {
     renderCheckout();
   } else if (name === "manage") {
+    if (!currentUser || currentUser.role !== "admin") {
+      window.location.href = "login.html?redirect=manage";
+      return;
+    }
     setupAdminPortal();
   }
 }
@@ -892,14 +896,12 @@ async function resetDatabaseToDefault() {
    ======================================================== */
 async function setupAdminPortal() {
   if (!currentUser || currentUser.role !== "admin") {
-    $("admin-gate").hidden = false;
-    $("admin-dashboard").hidden = true;
+    window.location.href = "login.html?redirect=manage";
     return;
   }
 
-  $("admin-gate").hidden = true;
-  $("admin-dashboard").hidden = false;
-  $("admin-greeting").textContent = `(Xin chào, ${currentUser.fullName})`;
+  const greetingEl = $("admin-greeting");
+  if (greetingEl) greetingEl.textContent = `(Xin chào, ${currentUser.fullName})`;
   
   // Nạp danh sách đơn hàng và danh sách sản phẩm
   switchAdminTab(activeAdminTab || "orders");
@@ -1235,7 +1237,7 @@ function logout() {
   toast("Đã đăng xuất tài khoản.");
   updateAuthUI();
   if (!$("manage-view").hidden) {
-    setupAdminPortal();
+    showView("home");
   }
   if (!$("checkout-view").hidden) {
     renderCheckout();

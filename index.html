@@ -367,28 +367,8 @@
 
     <!-- 9. ADMIN PORTAL (QUẢN TRỊ VIÊN: ĐƠN HÀNG & SẢN PHẨM) -->
     <section id="manage-view" class="view shell py-12" hidden>
-      <!-- GATE: HIỂN THỊ KHI CHƯA ĐĂNG NHẬP ADMIN -->
-      <div id="admin-gate" class="max-w-md mx-auto bg-white rounded-2xl border p-8 shadow-sm text-center">
-        <div class="w-16 h-16 rounded-full bg-emerald-100 text-[#174d37] flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="shield-alert" class="w-8 h-8"></i>
-        </div>
-        <h1 class="text-2xl font-bold text-[#173626] mb-2">Khu Vực Quản Trị Viên</h1>
-        <p class="text-sm text-gray-500 mb-6">Trang này dành riêng cho quản trị viên để quản lý đơn hàng và sản phẩm. Vui lòng đăng nhập để tiếp tục.</p>
-
-        <a href="login.html?redirect=manage" class="primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-sm">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>Đến Trang Đăng Nhập Quản Trị</span>
-        </a>
-
-        <div class="mt-5 p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 text-left">
-          <strong>Tài khoản Admin mặc định:</strong><br>
-          • Đăng nhập: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin</code> (hoặc <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin@yenbinhmarket.vn</code>)<br>
-          • Mật khẩu: <code class="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">admin123</code>
-        </div>
-      </div>
-
-      <!-- DASHBOARD: HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP QUYỀN ADMIN -->
-      <div id="admin-dashboard" hidden>
+      <!-- DASHBOARD: DÀNH RIÊNG CHO QUẢN TRỊ VIÊN -->
+      <div id="admin-dashboard">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b pb-5">
           <div>
             <div class="flex items-center gap-2">
