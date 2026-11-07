@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+  command = ""
+
+# Đảm bảo mã hóa UTF-8 cho HTML/CSS/JS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
