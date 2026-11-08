@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản Lý Đơn Hàng · YÊN BÌNH MARKET</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,10 +52,7 @@
   <header class="w-full bg-white border-b border-[#dbe5d8] py-4 sticky top-0 z-30 shadow-sm">
     <div class="shell flex flex-wrap items-center justify-between gap-4">
       <a href="index.html" class="flex items-center gap-3 text-left">
-        <span class="relative w-11 h-11 rounded-xl bg-[#e9c963] text-[#174d37] flex items-center justify-center shadow-sm">
-          <i data-lucide="mountain" class="w-6 h-6"></i>
-          <i data-lucide="leaf" class="w-3.5 h-3.5 absolute -top-1 -right-1 text-green-800"></i>
-        </span>
+        <img src="images/logo.svg" alt="Logo Yên Bình Market" class="w-11 h-11 rounded-xl object-contain shadow-sm shrink-0">
         <span>
           <strong class="block tracking-wide text-base md:text-lg text-[#173626] font-bold">YÊN BÌNH MARKET</strong>
           <small class="block text-xs text-gray-500 font-medium">Cổng Quản Lý & Theo Dõi Đơn Hàng</small>
@@ -256,14 +254,129 @@
 
       <!-- 3. TAB: QUẢN LÝ KHO SẢN PHẨM -->
       <div id="panel-admin-products" class="space-y-6" hidden>
+        <!-- FORM THÊM / CẬP NHẬT SẢN PHẨM -->
+        <div class="bg-white rounded-3xl border border-[#dbe5d8] p-6 md:p-8 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="bg-emerald-100 text-[#174d37] text-xs font-bold px-2.5 py-0.5 rounded-full">Supabase Realtime</span>
+                <span id="product-form-badge" class="text-xs text-gray-500 font-medium">Thêm món mới</span>
+              </div>
+              <h2 id="product-form-title" class="text-xl md:text-2xl font-bold text-[#173626] flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-6 h-6 text-[#174d37]"></i> Thêm Sản Phẩm Mới Vào Kho & Cửa Hàng
+              </h2>
+              <p class="text-xs text-gray-500 mt-1">Sản phẩm sau khi lưu sẽ lập tức xuất hiện trên gian hàng chính của khách hàng.</p>
+            </div>
+            <button type="button" id="btn-toggle-product-form" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5">
+              <i data-lucide="chevron-up" class="w-4 h-4"></i> Thu gọn form
+            </button>
+          </div>
+
+          <form id="product-form" class="grid sm:grid-cols-2 gap-5" novalidate>
+            <input type="hidden" id="p-id" value="">
+            
+            <div class="sm:col-span-2">
+              <label for="p-name" class="label font-bold text-[#173626]">Tên sản phẩm <span class="text-red-500">*</span></label>
+              <input id="p-name" class="field" required maxlength="120" placeholder="Ví dụ: Măng nứa sấy khô Tây Bắc thượng hạng">
+            </div>
+
+            <div>
+              <label for="p-category" class="label font-bold text-[#173626]">Tên hiển thị danh mục <span class="text-red-500">*</span></label>
+              <input id="p-category" class="field" required maxlength="70" placeholder="Ví dụ: Đặc sản sấy khô">
+            </div>
+
+            <div>
+              <label for="p-group" class="label font-bold text-[#173626]">Nhóm lọc sản phẩm</label>
+              <select id="p-group" class="field">
+                <option value="dry">Thực phẩm khô</option>
+                <option value="tea">Trà đặc sản</option>
+                <option value="natural">Thảo mộc tự nhiên</option>
+                <option value="spice">Gia vị núi rừng</option>
+                <option value="drink">Đồ uống thiên nhiên</option>
+                <option value="all">Khác / Tổng hợp</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="p-price" class="label font-bold text-[#173626]">Giá bán (VNĐ) <span class="text-red-500">*</span></label>
+              <input id="p-price" class="field" type="number" min="1000" step="1000" required placeholder="Ví dụ: 180000">
+            </div>
+
+            <div>
+              <label for="p-origin" class="label font-bold text-[#173626]">Xuất xứ / Nguồn gốc</label>
+              <input id="p-origin" class="field" placeholder="Ví dụ: Huyện Yên Bình, Yên Bái">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="p-pack" class="label font-bold text-[#173626]">Quy cách đóng gói</label>
+              <input id="p-pack" class="field" placeholder="Ví dụ: Túi hút chân không 500g">
+            </div>
+
+            <!-- KHU VỰC THÊM ẢNH SẢN PHẨM -->
+            <div class="sm:col-span-2 bg-[#f9faf7] p-5 rounded-2xl border border-[#dbe5d8]">
+              <label class="label text-[#174d37] flex items-center gap-2 mb-3 font-bold">
+                <i data-lucide="image" class="w-5 h-5"></i> Hình ảnh sản phẩm
+              </label>
+              
+              <div class="grid md:grid-cols-2 gap-4 items-start">
+                <!-- Cột 1: Tải ảnh từ máy -->
+                <div>
+                  <p class="text-xs font-semibold text-gray-600 mb-2">Cách 1: Tải ảnh từ máy tính / điện thoại</p>
+                  <div id="image-upload-zone" class="image-upload-zone">
+                    <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-[#174d37] mb-2"></i>
+                    <p class="text-sm font-bold text-[#173626]">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                    <p class="text-xs text-gray-400 mt-1">Định dạng JPG, PNG, WEBP (Tự động nén tối ưu)</p>
+                    <input type="file" id="p-image-file" accept="image/*" class="hidden">
+                  </div>
+                </div>
+
+                <!-- Cột 2: Nhập đường link URL ảnh -->
+                <div>
+                  <p class="text-xs font-semibold text-gray-600 mb-2">Cách 2: Nhập URL ảnh online</p>
+                  <input id="p-image-url" type="url" class="field text-sm" placeholder="https://images.unsplash.com/photo-...">
+                  <p class="text-xs text-gray-400 mt-2">Dán liên kết ảnh từ Unsplash, Google Drive, hoặc host bất kỳ.</p>
+                </div>
+              </div>
+
+              <!-- Khung xem trước ảnh đã chọn -->
+              <div id="image-preview-container" class="preview-container" hidden>
+                <img id="image-preview" src="" alt="Xem trước ảnh">
+                <button type="button" id="image-preview-remove" class="preview-remove-btn" title="Hủy ảnh">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="p-description" class="label font-bold text-[#173626]">Mô tả sản phẩm</label>
+              <textarea id="p-description" class="field" rows="3" maxlength="600" placeholder="Giới thiệu về hương vị đặc trưng, thành phần nguyên chất và lợi ích của sản phẩm..."></textarea>
+            </div>
+
+            <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-2">
+              <button id="product-submit" type="submit" class="primary py-3 px-8 text-sm font-bold flex items-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i> Lưu Sản Phẩm Vào Database
+              </button>
+              <button id="btn-cancel-edit-product" type="button" class="outline py-3 px-5 text-sm font-semibold flex items-center gap-2" hidden>
+                <i data-lucide="x" class="w-4 h-4"></i> Hủy Chỉnh Sửa
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- DANH SÁCH SẢN PHẨM HIỆN CÓ TRONG KHO -->
         <div class="bg-white rounded-3xl border border-[#dbe5d8] p-6 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <h2 class="text-xl font-bold text-[#173626] flex items-center gap-2">
               <i data-lucide="package" class="w-5 h-5 text-[#174d37]"></i> Danh Sách Sản Phẩm Trong Kho
             </h2>
-            <button id="btn-reset-db" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5 text-red-700 hover:bg-red-50">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Dọn dẹp kho
-            </button>
+            <div class="flex items-center gap-2">
+              <button id="btn-quick-add-scroll" type="button" class="primary text-xs px-3.5 py-1.5 flex items-center gap-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm món mới
+              </button>
+              <button id="btn-reset-db" type="button" class="outline text-xs px-3 py-1.5 flex items-center gap-1.5 text-red-700 hover:bg-red-50">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Dọn dẹp kho
+              </button>
+            </div>
           </div>
           <div class="db-table-wrapper rounded-2xl overflow-hidden border">
             <table class="db-table">
@@ -273,7 +386,7 @@
                   <th class="w-16">Ảnh</th>
                   <th>Tên sản phẩm & Danh mục</th>
                   <th class="whitespace-nowrap">Giá bán</th>
-                  <th class="text-right">Thao tác</th>
+                  <th class="text-right whitespace-nowrap min-w-[100px]">Thao tác</th>
                 </tr>
               </thead>
               <tbody id="manage-products-list">
@@ -716,6 +829,23 @@
 
         loadAllAdminOrders();
         loadProductsForAdmin();
+        initProductManagement();
+
+        // Tự động chuyển tab theo URL query parameter (?tab=products, ?action=add)
+        const urlParams = new URLSearchParams(window.location.search);
+        const reqTab = urlParams.get("tab");
+        if (reqTab && ["orders", "new-order", "products"].includes(reqTab)) {
+          switchAdminTab(reqTab);
+          if (reqTab === "products" && urlParams.get("action") === "add") {
+            setTimeout(() => {
+              const nameInput = $("p-name");
+              if (nameInput) {
+                nameInput.focus();
+                nameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            }, 300);
+          }
+        }
       }
 
       function switchAdminTab(tabName) {
@@ -1233,8 +1363,11 @@
               <small class="text-gray-400">${p.category || 'Đặc sản'}</small>
             </td>
             <td class="font-bold text-[#173626] text-sm">${money(p.price)}</td>
-            <td class="text-right">
-              <button type="button" class="text-red-600 hover:text-red-800 p-1.5" onclick="window.deleteProductById('${p.id}')" title="Xóa món">
+            <td class="text-right whitespace-nowrap">
+              <button type="button" class="text-amber-600 hover:text-amber-800 p-1.5 mr-1" onclick="window.editProductById('${p.id}')" title="Chỉnh sửa món này">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button type="button" class="text-red-600 hover:text-red-800 p-1.5" onclick="window.deleteProductById('${p.id}')" title="Xóa món khỏi kho">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </td>
@@ -1270,6 +1403,266 @@
           console.error(err);
           toast("Lỗi khi dọn dẹp kho.");
         }
+      }
+
+      /* ========================================================
+         PHẦN 3: QUẢN LÝ KHO SẢN PHẨM & FORM THÊM/SỬA SẢN PHẨM
+         ======================================================== */
+      let currentProductImage = "";
+
+      // Nén ảnh chất lượng cao phía client trước khi upload
+      function compressAndReadImage(file, maxWidth = 900, quality = 0.82) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              let width = img.width;
+              let height = img.height;
+              if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              }
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.onerror = (err) => reject(err);
+          };
+          reader.onerror = (err) => reject(err);
+        });
+      }
+
+      function initProductManagement() {
+        const fileInput = $("p-image-file");
+        const urlInput = $("p-image-url");
+        const uploadZone = $("image-upload-zone");
+        const previewBox = $("image-preview-container");
+        const previewImg = $("image-preview");
+        const removeBtn = $("image-preview-remove");
+        const productForm = $("product-form");
+        const btnToggle = $("btn-toggle-product-form");
+        const btnCancelEdit = $("btn-cancel-edit-product");
+        const btnQuickAdd = $("btn-quick-add-scroll");
+
+        if (uploadZone && fileInput) {
+          uploadZone.onclick = () => fileInput.click();
+
+          uploadZone.ondragover = (e) => {
+            e.preventDefault();
+            uploadZone.classList.add("dragover");
+          };
+          uploadZone.ondragleave = () => uploadZone.classList.remove("dragover");
+          uploadZone.ondrop = async (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove("dragover");
+            const file = e.dataTransfer.files[0];
+            if (file) handleImageFile(file);
+          };
+
+          fileInput.onchange = () => {
+            const file = fileInput.files[0];
+            if (file) handleImageFile(file);
+          };
+        }
+
+        async function handleImageFile(file) {
+          if (!file.type.startsWith("image/")) {
+            toast("Vui lòng chọn tệp hình ảnh hợp lệ (JPG, PNG, WEBP)!");
+            return;
+          }
+          try {
+            toast("Đang tối ưu và tải ảnh...");
+            const compressed = await compressAndReadImage(file);
+            currentProductImage = compressed;
+            if (previewImg) previewImg.src = compressed;
+            if (previewBox) previewBox.hidden = false;
+            if (urlInput) urlInput.value = "";
+            toast("Đã chọn ảnh thành công!");
+          } catch (err) {
+            console.error("Lỗi nén ảnh:", err);
+            toast("Lỗi khi xử lý hình ảnh.");
+          }
+        }
+
+        if (urlInput) {
+          urlInput.oninput = () => {
+            const url = urlInput.value.trim();
+            if (url) {
+              currentProductImage = url;
+              if (previewImg) previewImg.src = url;
+              if (previewBox) previewBox.hidden = false;
+            } else {
+              currentProductImage = "";
+              if (previewBox) previewBox.hidden = true;
+            }
+          };
+        }
+
+        if (removeBtn) {
+          removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            currentProductImage = "";
+            if (fileInput) fileInput.value = "";
+            if (urlInput) urlInput.value = "";
+            if (previewBox) previewBox.hidden = true;
+            if (previewImg) previewImg.src = "";
+          };
+        }
+
+        if (btnToggle && productForm) {
+          btnToggle.onclick = () => {
+            const isHidden = productForm.hidden;
+            productForm.hidden = !isHidden;
+            btnToggle.innerHTML = !isHidden
+              ? '<i data-lucide="chevron-down" class="w-4 h-4"></i> Mở rộng form'
+              : '<i data-lucide="chevron-up" class="w-4 h-4"></i> Thu gọn form';
+            if (window.lucide) lucide.createIcons();
+          };
+        }
+
+        if (btnQuickAdd && productForm) {
+          btnQuickAdd.onclick = () => {
+            resetProductForm();
+            productForm.hidden = false;
+            if (btnToggle) {
+              btnToggle.innerHTML = '<i data-lucide="chevron-up" class="w-4 h-4"></i> Thu gọn form';
+            }
+            $("p-name").focus();
+            productForm.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (window.lucide) lucide.createIcons();
+          };
+        }
+
+        if (btnCancelEdit) {
+          btnCancelEdit.onclick = resetProductForm;
+        }
+
+        if (productForm) {
+          productForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const submitBtn = $("product-submit");
+            const name = $("p-name").value.trim();
+            const category = $("p-category").value.trim();
+            const group = $("p-group").value || "all";
+            const price = Number($("p-price").value);
+            const origin = $("p-origin").value.trim();
+            const pack = $("p-pack").value.trim();
+            const desc = $("p-description").value.trim();
+            const editId = $("p-id").value.trim();
+
+            if (!name || !price || isNaN(price)) {
+              toast("Vui lòng điền đầy đủ Tên sản phẩm và Giá bán!");
+              return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Đang lưu vào Database...';
+
+            let productImg = currentProductImage;
+            if (!productImg) {
+              productImg = "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80";
+            }
+
+            const productPayload = {
+              id: editId || ("prod_" + Date.now()),
+              name,
+              category: category || "Đặc sản",
+              group,
+              price,
+              image: productImg,
+              description: desc || "Sản phẩm đặc sản thiên nhiên nguyên chất.",
+              features: "Được kiểm duyệt chất lượng nghiêm ngặt trước khi xuất bán.",
+              ingredients: "100% nguyên liệu tự nhiên chọn lọc.",
+              origin: origin || "Yên Bái, Việt Nam",
+              pack: pack || "Đóng gói tiêu chuẩn",
+              usage: "Dùng trực tiếp hoặc chế biến theo sở thích."
+            };
+
+            if (!editId) {
+              productPayload.createdAt = new Date().toISOString();
+            }
+
+            try {
+              if (!supabaseClient) throw new Error("Chưa kết nối Supabase");
+              const { error } = await supabaseClient.from("products").upsert([productPayload]);
+              if (error) throw error;
+
+              toast(editId ? "Đã cập nhật thông tin sản phẩm thành công!" : "Đã thêm sản phẩm mới vào Database thành công!");
+              resetProductForm();
+              await loadProductsForAdmin();
+            } catch (err) {
+              console.error("Lỗi khi lưu sản phẩm:", err);
+              toast("Lỗi khi lưu sản phẩm vào Database: " + (err.message || "Kiểm tra kết nối"));
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> ${editId ? "Cập Nhật Sản Phẩm" : "Lưu Sản Phẩm Vào Database"}`;
+              if (window.lucide) lucide.createIcons();
+            }
+          };
+        }
+      }
+
+      window.editProductById = (id) => {
+        const p = allProducts.find((x) => x.id === id);
+        if (!p) return;
+        $("p-id").value = p.id;
+        $("p-name").value = p.name || "";
+        $("p-category").value = p.category || "";
+        $("p-group").value = p.group || "all";
+        $("p-price").value = p.price || "";
+        $("p-origin").value = p.origin || "";
+        $("p-pack").value = p.pack || "";
+        $("p-description").value = p.description || "";
+
+        currentProductImage = p.image || "";
+        const previewBox = $("image-preview-container");
+        const previewImg = $("image-preview");
+        if (currentProductImage && previewImg && previewBox) {
+          previewImg.src = currentProductImage;
+          previewBox.hidden = false;
+        } else if (previewBox) {
+          previewBox.hidden = true;
+        }
+
+        $("product-form-title").innerHTML = `<i data-lucide="edit" class="w-6 h-6 text-amber-600"></i> Chỉnh Sửa Sản Phẩm: ${p.name}`;
+        $("product-form-badge").textContent = "Đang chỉnh sửa";
+        $("product-submit").innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Cập Nhật Sản Phẩm`;
+        $("btn-cancel-edit-product").hidden = false;
+
+        const productForm = $("product-form");
+        if (productForm) {
+          productForm.hidden = false;
+          const btnToggle = $("btn-toggle-product-form");
+          if (btnToggle) {
+            btnToggle.innerHTML = '<i data-lucide="chevron-up" class="w-4 h-4"></i> Thu gọn form';
+          }
+          productForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        if (window.lucide) lucide.createIcons();
+      };
+
+      function resetProductForm() {
+        const productForm = $("product-form");
+        if (productForm) productForm.reset();
+        $("p-id").value = "";
+        currentProductImage = "";
+        const previewBox = $("image-preview-container");
+        const previewImg = $("image-preview");
+        if (previewBox) previewBox.hidden = true;
+        if (previewImg) previewImg.src = "";
+        if ($("p-image-url")) $("p-image-url").value = "";
+        if ($("p-image-file")) $("p-image-file").value = "";
+        $("product-form-title").innerHTML = `<i data-lucide="plus-circle" class="w-6 h-6 text-[#174d37]"></i> Thêm Sản Phẩm Mới Vào Kho & Cửa Hàng`;
+        $("product-form-badge").textContent = "Thêm món mới";
+        $("product-submit").innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Lưu Sản Phẩm Vào Database`;
+        $("btn-cancel-edit-product").hidden = true;
+        if (window.lucide) lucide.createIcons();
       }
 
       // Thêm món vào đơn thủ công

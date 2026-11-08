@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdfbf0"/>
+      <stop offset="100%" stop-color="#f4ebcf"/>
+    </linearGradient>
+
+    <!-- Golden Sun Gradient -->
+    <linearGradient id="sunGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#e9a825"/>
+      <stop offset="100%" stop-color="#f7d968"/>
+    </linearGradient>
+
+    <!-- Mountain Gradient 1 -->
+    <linearGradient id="mountGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a7755"/>
+      <stop offset="100%" stop-color="#174d37"/>
+    </linearGradient>
+
+    <!-- Mountain Gradient 2 -->
+    <linearGradient id="mountGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c573f"/>
+      <stop offset="100%" stop-color="#113828"/>
+    </linearGradient>
+
+    <!-- Leaf Gradient -->
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#64a338"/>
+      <stop offset="100%" stop-color="#3b7a1e"/>
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="badgeShadow" x="-10%" y="-10%" width="125%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#173626" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Container Badge -->
+  <rect x="4" y="4" width="112" height="112" rx="26" fill="url(#bgGrad)" stroke="#e4d6a7" stroke-width="2" filter="url(#badgeShadow)"/>
+
+  <!-- Morning Sun / Dawn behind mountains -->
+  <circle cx="60" cy="52" r="22" fill="url(#sunGrad)"/>
+
+  <!-- Sun Rays / Accent Arc -->
+  <circle cx="60" cy="52" r="28" stroke="#f0c842" stroke-width="1.5" stroke-dasharray="3 4" stroke-opacity="0.6"/>
+
+  <!-- Distant Mountain -->
+  <path d="M26 84 L50 48 L74 84 Z" fill="url(#mountGrad1)" opacity="0.95"/>
+  <path d="M50 48 L74 84 L60 84 Z" fill="#14422f" opacity="0.25"/>
+
+  <!-- Main Front Mountain -->
+  <path d="M44 84 L72 40 L98 84 Z" fill="url(#mountGrad2)"/>
+  <path d="M72 40 L98 84 L82 84 Z" fill="#0d281d" opacity="0.3"/>
+
+  <!-- Terraced Fields / Hill curves at base -->
+  <path d="M16 86 Q60 68 104 86 L104 94 Q60 80 16 94 Z" fill="#2d6e4b"/>
+  <path d="M16 91 Q60 76 104 91 L104 98 Q60 88 16 98 Z" fill="#174d37"/>
+
+  <!-- Green Tea Leaf Emblem (Fresh sprout floating/ascending on top right) -->
+  <g transform="translate(62, 18) scale(0.95)">
+    <!-- Right leaf -->
+    <path d="M18 26 C18 10 32 4 40 2 C40 16 32 30 18 26 Z" fill="url(#leafGrad)"/>
+    <path d="M22 22 C28 14 34 8 38 4" stroke="#a7e270" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Left leaf -->
+    <path d="M18 25 C14 16 4 15 0 16 C4 26 12 30 18 25 Z" fill="#528e2c"/>
+  </g>
+
+  <!-- Small Gold Star / Quality Mark -->
+  <circle cx="60" cy="103" r="2.5" fill="#e9a825"/>
+  <circle cx="51" cy="103" r="1.5" fill="#e9a825" opacity="0.6"/>
+  <circle cx="69" cy="103" r="1.5" fill="#e9a825" opacity="0.6"/>
+</svg>

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YÊN BÌNH MARKET · Đặc sản quê nhà</title>
+  <title>YÊN BÌNH MARKET</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,10 +29,7 @@
     </div>
     <div class="shell py-4 flex flex-wrap lg:flex-nowrap items-center gap-4">
       <button type="button" data-go="home" class="flex items-center gap-3 text-left shrink-0" aria-label="Về trang chủ">
-        <span class="relative w-12 h-12 rounded-xl bg-[#e9c963] text-[#174d37] flex items-center justify-center shadow-sm" aria-hidden="true">
-          <i data-lucide="mountain" class="w-7 h-7"></i>
-          <i data-lucide="leaf" class="w-4 h-4 absolute -top-1 -right-1 text-green-800"></i>
-        </span>
+        <img src="images/logo.svg" alt="Logo Yên Bình Market" class="w-12 h-12 rounded-xl object-contain shadow-sm shrink-0">
         <span>
           <strong class="block tracking-wide text-lg text-[#173626] font-bold">YÊN BÌNH MARKET</strong>
           <small class="block text-xs text-gray-500 font-medium">Đặc sản quê nhà · Nông sản sạch</small>
@@ -73,6 +71,10 @@
       <a href="orders.html" id="nav-orders-link" class="nav-link text-[#174d37] font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200" hidden>
         <i data-lucide="package-check" class="w-4 h-4 text-emerald-700"></i>
         <span id="nav-orders-label">Đơn Hàng Của Tôi</span>
+      </a>
+      <a href="orders.html?tab=products&action=add" id="nav-add-product-link" class="nav-link text-emerald-800 font-bold flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition" hidden>
+        <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-700"></i>
+        <span>+ Thêm Sản Phẩm</span>
       </a>
     </nav>
   </header>

@@ -492,14 +492,21 @@ function renderProductsGrid() {
   grid.innerHTML = "";
 
   if (!currentProducts || currentProducts.length === 0) {
+    const isAdmin = currentUser && currentUser.role === "admin";
     grid.innerHTML = `
       <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-[#cbd8c9] p-8 my-4">
         <i data-lucide="package-open" class="w-12 h-12 text-[#174d37]/40 mx-auto mb-3"></i>
         <h3 class="text-lg font-bold text-[#173626]">Chưa có sản phẩm nào trong cửa hàng</h3>
-        <p class="text-sm text-gray-500 mt-1 mb-4">Bạn có thể tự thêm các sản phẩm thực tế kèm ảnh và giá ở mục Quản lý sản phẩm.</p>
-        <button type="button" class="primary px-5 py-2.5 text-sm inline-flex items-center gap-2" onclick="showView('manage')">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm sản phẩm thực tế ngay
-        </button>
+        <p class="text-sm text-gray-500 mt-1 mb-4">${isAdmin ? "Bạn có thể tự thêm các sản phẩm thực tế kèm ảnh và giá ở mục Quản lý sản phẩm." : "Cửa hàng đang cập nhật sản phẩm mới, quý khách vui lòng quay lại sau ít phút!"}</p>
+        ${isAdmin ? `
+          <a href="orders.html?tab=products&action=add" class="primary px-5 py-2.5 text-sm inline-flex items-center gap-2 font-bold">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm sản phẩm thực tế ngay
+          </a>
+        ` : `
+          <a href="login.html?redirect=orders" class="outline px-5 py-2.5 text-sm inline-flex items-center gap-2 font-semibold">
+            <i data-lucide="user" class="w-4 h-4"></i> Đăng nhập quản trị viên
+          </a>
+        `}
       </div>
     `;
     if (window.lucide) lucide.createIcons();
@@ -805,6 +812,7 @@ function updateAuthUI() {
   const logoutBtn = $("header-logout-btn");
   const ordersLink = $("nav-orders-link");
   const ordersLabel = $("nav-orders-label");
+  const addProductLink = $("nav-add-product-link");
 
   if (currentUser) {
     if (label) label.textContent = currentUser.fullName || "Tài khoản";
@@ -815,8 +823,11 @@ function updateAuthUI() {
     if (ordersLink) {
       ordersLink.hidden = false;
       if (ordersLabel) {
-        ordersLabel.textContent = currentUser.role === "admin" ? "Quản Trị Đơn Hàng" : "Đơn Hàng Của Tôi";
+        ordersLabel.textContent = currentUser.role === "admin" ? "Quản Trị & Kho Hàng" : "Đơn Hàng Của Tôi";
       }
+    }
+    if (addProductLink) {
+      addProductLink.hidden = currentUser.role !== "admin";
     }
     if (logoutBtn) logoutBtn.hidden = false;
   } else {
@@ -826,6 +837,7 @@ function updateAuthUI() {
       accountBtn.onclick = null;
     }
     if (ordersLink) ordersLink.hidden = true;
+    if (addProductLink) addProductLink.hidden = true;
     if (logoutBtn) logoutBtn.hidden = true;
   }
   if (window.lucide) lucide.createIcons();
