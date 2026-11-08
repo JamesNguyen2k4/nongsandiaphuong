@@ -812,7 +812,6 @@ function updateAuthUI() {
   const logoutBtn = $("header-logout-btn");
   const ordersLink = $("nav-orders-link");
   const ordersLabel = $("nav-orders-label");
-  const addProductLink = $("nav-add-product-link");
 
   if (currentUser) {
     if (label) label.textContent = currentUser.fullName || "Tài khoản";
@@ -823,11 +822,8 @@ function updateAuthUI() {
     if (ordersLink) {
       ordersLink.hidden = false;
       if (ordersLabel) {
-        ordersLabel.textContent = currentUser.role === "admin" ? "Quản Trị & Kho Hàng" : "Đơn Hàng Của Tôi";
+        ordersLabel.textContent = currentUser.role === "admin" ? "Quản Trị Admin" : "Đơn Hàng Của Tôi";
       }
-    }
-    if (addProductLink) {
-      addProductLink.hidden = currentUser.role !== "admin";
     }
     if (logoutBtn) logoutBtn.hidden = false;
   } else {
@@ -837,7 +833,6 @@ function updateAuthUI() {
       accountBtn.onclick = null;
     }
     if (ordersLink) ordersLink.hidden = true;
-    if (addProductLink) addProductLink.hidden = true;
     if (logoutBtn) logoutBtn.hidden = true;
   }
   if (window.lucide) lucide.createIcons();
